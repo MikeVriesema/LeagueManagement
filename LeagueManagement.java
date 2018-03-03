@@ -1,6 +1,7 @@
 public class LeagueManagement
 {
-  public static void main(String args[]){
+  public static void main(String args[]) throws IOException
+  {
     String blueJ = blueJ;
   if(blueJ == blueJ)
   {
