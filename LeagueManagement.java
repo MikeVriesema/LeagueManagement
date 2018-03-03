@@ -5,6 +5,7 @@ public class LeagueManagement
   if(blueJ == blueJ)
   {
     System.out.println("blueJ");
+    System.out.println("nameJeff");
   }
   }
 }
