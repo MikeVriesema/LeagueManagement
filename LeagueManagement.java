@@ -1,41 +1,87 @@
+/**
+ * LeagueManagement
+ */
 import javax.swing.JOptionPane;
 import java.io.*;
 import java.util.*;
 
-public class LeagueManagement 
+public class LeagueManagement
 {
     public static void main(String[] args) throws IOException
     {
+        boolean loggedIn = false;
         File admin = new File("administrators.txt");
         File leagues = new File("leagues.txt");
-        String options[] = {"Log in", "Create new Admin"};
-        int choice;
-
+        String options[] = {"Log in", "Create new Admin", "Quit"};
+        int choice = 0;
+        String loggedInUser = "Not logged in\n\n";
+        StringBuilder username = new StringBuilder("");
         checkSetup(admin, leagues);
-        
-        choice = JOptionPane.showOptionDialog(null, "select an action", "League Manager",JOptionPane.YES_NO_OPTION, 1, null, options, options[0]);
 
-        if(choice == 0)
+        do
         {
-            String inputName = "";
-            String inputPassword = "";
-
-            inputName = JOptionPane.showInputDialog(null, "Please enter admin name");
-            if(inputName != null)
+            if(!loggedIn)
             {
-                if(doesInputExist(admin, inputName))
+                choice = JOptionPane.showOptionDialog(null, loggedInUser + "select an action", "League Manager",JOptionPane.YES_NO_OPTION, 
+                                                    1, null, options, options[0]);
+
+                if(choice == 0)
                 {
-                    int index = findIdentifierNumber(admin, inputName);
-                    String temp[];
-                    inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + inputName);
-                    temp = stringAtLineNumber(admin, index).split(",");
-                    if(inputPassword.equals(temp[2]))
-                        JOptionPane.showMessageDialog(null, "Succesfully logged in!");
+                    loggedIn = logInSequence(admin, username);
+                    if(loggedIn)
+                        loggedInUser = "Logged in as: " + username + "\n\n";
                 }
             }
-        }
+            else
+                choice = JOptionPane.showOptionDialog(null, loggedInUser + "select an action", "League Manager",JOptionPane.YES_NO_OPTION, 
+                                                    1, null, options, options[0]);
+        }while(choice != 2);
     }
 
+    public static boolean logInSequence(File adminFile, StringBuilder user) throws IOException
+    {
+        boolean loggedIn = false;
+        String inputName = "";
+        String inputPassword = "";
+        String namePattern = "[a-zA-Z]{1,}";
+        String passwordPattern = "[a-zA-Z0-9]{5,}";
+
+
+        inputName = JOptionPane.showInputDialog(null, "Please enter admin name");
+        if(inputName != null)
+        {
+            if(inputName.matches(namePattern))
+            {
+                if(doesInputExist(adminFile, inputName, false))
+                {
+                    String temp[];
+                    int index = findIdentifierNumber(adminFile, inputName);
+                    temp = stringAtLineNumber(adminFile, index).split(",");
+                    inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]);
+                    if(inputPassword != null)
+                    {
+                        if(inputPassword.matches(passwordPattern) && inputPassword.equals(temp[2]))
+                        {
+                            JOptionPane.showMessageDialog(null, "Succesfully logged in!");
+                            user.append(temp[1]);
+                            loggedIn = true;
+                        }
+                        else
+                            JOptionPane.showMessageDialog(null, "Incorrect password");
+                    }
+                }
+                else
+                {
+                    JOptionPane.showMessageDialog(null, inputName + " is not an existing admin");
+                }
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(null, inputName + " does not match the username format");
+            }
+        }
+        return loggedIn;
+    }
     //Rian
     public static void checkSetup(File input1, File input2) throws IOException
     {
@@ -58,19 +104,33 @@ public class LeagueManagement
         }
     }
     //Rian
-    public static boolean doesInputExist(File filename, String input) throws IOException
+    public static boolean doesInputExist(File filename, String input, boolean caseSensitive) throws IOException
     {
         if(filename.exists())
         {
             Scanner in = new Scanner(filename);
             while(in.hasNext())
             {
-                String aLineFromFile = in.nextLine();
-                if(aLineFromFile.contains(input))
-                    return true;
+                if(caseSensitive)
+                {
+                    String aLineFromFile = in.nextLine();
+                    if(aLineFromFile.contains(input))
+                    {
+                      in.close();
+                     return true;
+                    }
+                }
+                else
+                {
+                    String aLineFromFile = in.nextLine().toLowerCase();
+                    if(aLineFromFile.contains(input.toLowerCase()))
+                    {
+                        in.close();
+                        return true;
+                    }
+                }
             }
-
-            return false;
+            in.close();
         }
         return false;
     }
@@ -85,6 +145,8 @@ public class LeagueManagement
 
             for(int i = 0; i < lineNumber && in.hasNext(); i++)
                 result = in.nextLine();
+                
+            in.close();
         }
         return result;
     }
@@ -103,7 +165,7 @@ public class LeagueManagement
                 aLineFromFile = in.nextLine();
                 String temp[] = aLineFromFile.split(",");
 
-                if(temp[1].equals(adminName))
+                if(temp[1].toLowerCase().equals(adminName))
                 {
                     identifier = Integer.parseInt(temp[0]);
                     break;
