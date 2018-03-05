@@ -7,19 +7,21 @@ import java.util.*;
 
 public class LeagueManagement
 {
+    static StringBuilder username;
+    static int usernameID;
+
     public static void main(String[] args) throws IOException
     {
         boolean loggedIn = false;
         File admin = new File("administrators.txt");
         File leagues = new File("leagues.txt");
         String options[] = {"Log in", "Create New Admin", "Quit"};
-	String tableOptions[] = {"Create League", "Manage Existing League", "Log out", "Ouit"};
+	    String tableOptions[] = {"Create League", "Manage Existing League", "Log out", "Ouit"};
         int choice = 0;
-	int choice2 = 0;
+	    int choice2 = 0;
         String loggedInUser = "You are currently not logged in:\n\n";
-        StringBuilder username = new StringBuilder("");
+        username = new StringBuilder("");
         checkSetup(admin, leagues);
-
       
 		do
         {
@@ -30,10 +32,10 @@ public class LeagueManagement
 
                 if(choice == 0)
                 {
-		    username = new StringBuilder("");
                     loggedIn = logInSequence(admin, username);
                     if(loggedIn)
                         loggedInUser = "Logged in: " + username + "\n\n";
+                        usernameID = findIdentifierNumber(admin, username.toString());
                 }
             }
 			//losg
