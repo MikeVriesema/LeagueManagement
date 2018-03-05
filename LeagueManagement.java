@@ -16,6 +16,7 @@ public class LeagueManagement
         int choice = 0;
         String loggedInUser = "Not logged in\n\n";
         StringBuilder username = new StringBuilder("");
+
         checkSetup(admin, leagues);
 
         do
@@ -43,20 +44,20 @@ public class LeagueManagement
         boolean loggedIn = false;
         String inputName = "";
         String inputPassword = "";
-        String namePattern = "[a-zA-Z]{1,}";
         String passwordPattern = "[a-zA-Z0-9]{5,}";
 
 
         inputName = JOptionPane.showInputDialog(null, "Please enter admin name");
         if(inputName != null)
         {
-            if(inputName.matches(namePattern))
+            if(doesInputExist(adminFile, inputName, false))
             {
-                if(doesInputExist(adminFile, inputName, false))
+                String temp[];
+                int attempts = 0;
+                int index = findIdentifierNumber(adminFile, inputName);
+                temp = stringAtLineNumber(adminFile, index).split(",");
+                while(attempts < 3)
                 {
-                    String temp[];
-                    int index = findIdentifierNumber(adminFile, inputName);
-                    temp = stringAtLineNumber(adminFile, index).split(",");
                     inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]);
                     if(inputPassword != null)
                     {
@@ -65,21 +66,30 @@ public class LeagueManagement
                             JOptionPane.showMessageDialog(null, "Succesfully logged in!");
                             user.append(temp[1]);
                             loggedIn = true;
+                            break;
                         }
-                        else
-                            JOptionPane.showMessageDialog(null, "Incorrect password");
+                        else if(attempts < 3)
+                        {
+                            if(attempts == 2)
+                            {
+                                attempts++;
+                                JOptionPane.showMessageDialog(null, "No attempts left!");
+                            }
+                            else
+                            {    
+                                attempts++;
+                                JOptionPane.showMessageDialog(null, "Incorrect password\n" + (3 - attempts) + " attempts left");
+                            }
+                        }
                     }
-                }
-                else
-                {
-                    JOptionPane.showMessageDialog(null, inputName + " is not an existing admin");
+                    else
+                        break;
                 }
             }
             else
-            {
-                JOptionPane.showMessageDialog(null, inputName + " does not match the username format");
-            }
+                JOptionPane.showMessageDialog(null, inputName + " is not an existing admin");
         }
+
         return loggedIn;
     }
     //Rian
@@ -165,7 +175,7 @@ public class LeagueManagement
                 aLineFromFile = in.nextLine();
                 String temp[] = aLineFromFile.split(",");
 
-                if(temp[1].toLowerCase().equals(adminName))
+                if(temp[1].toLowerCase().equals(adminName.toLowerCase()))
                 {
                     identifier = Integer.parseInt(temp[0]);
                     break;
