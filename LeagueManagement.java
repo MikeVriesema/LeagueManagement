@@ -19,25 +19,38 @@ public class LeagueManagement
 
         checkSetup(admin, leagues);
 
-        do
+       do
         {
             if(!loggedIn)
             {
-                choice = JOptionPane.showOptionDialog(null, loggedInUser + "select an action", "League Manager",JOptionPane.YES_NO_OPTION, 
+                choice = JOptionPane.showOptionDialog(null, loggedInUser + "What would you like to do?", "League Manager",JOptionPane.YES_NO_OPTION, 
                                                     1, null, options, options[0]);
 
                 if(choice == 0)
                 {
+					username = new StringBuilder("");
                     loggedIn = logInSequence(admin, username);
                     if(loggedIn)
-                        loggedInUser = "Logged in as: " + username + "\n\n";
+                        loggedInUser = "Logged in: " + username + "\n\n";
                 }
             }
+			//losg
             else
-                choice = JOptionPane.showOptionDialog(null, loggedInUser + "select an action", "League Manager",JOptionPane.YES_NO_OPTION, 
-                                                    1, null, options, options[0]);
-        }while(choice != 2);
+                choice2 = JOptionPane.showOptionDialog(null, loggedInUser + "Select a Menu:", "League Manager",JOptionPane.YES_NO_OPTION, 
+                                                    1, null, tableOptions, options[0]);
+													
+				if (choice2 == 2){
+					
+					loggedIn = false;
+					loggedInUser = "Not logged in:\n\n";
+					choice2 = 0;
+					
+					
+				}
+				
+        }while(choice != 2 && choice2 !=3);
     }
+
 
     public static boolean logInSequence(File adminFile, StringBuilder user) throws IOException
     {
