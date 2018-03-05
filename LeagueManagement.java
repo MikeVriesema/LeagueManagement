@@ -12,14 +12,16 @@ public class LeagueManagement
         boolean loggedIn = false;
         File admin = new File("administrators.txt");
         File leagues = new File("leagues.txt");
-        String options[] = {"Log in", "Create new Admin", "Quit"};
+        String options[] = {"Log in", "Create New Admin", "Quit"};
+	String tableOptions[] = {"Create League", "Manage Existing League", "Log out", "Ouit"};
         int choice = 0;
-        String loggedInUser = "Not logged in\n\n";
+	int choice2 = 0;
+        String loggedInUser = "You are currently not logged in:\n\n";
         StringBuilder username = new StringBuilder("");
-
         checkSetup(admin, leagues);
 
-       do
+      
+		do
         {
             if(!loggedIn)
             {
@@ -28,7 +30,7 @@ public class LeagueManagement
 
                 if(choice == 0)
                 {
-					username = new StringBuilder("");
+		    username = new StringBuilder("");
                     loggedIn = logInSequence(admin, username);
                     if(loggedIn)
                         loggedInUser = "Logged in: " + username + "\n\n";
@@ -41,6 +43,7 @@ public class LeagueManagement
 													
 				if (choice2 == 2){
 					
+					username = new StringBuilder("");
 					loggedIn = false;
 					loggedInUser = "Not logged in:\n\n";
 					choice2 = 0;
