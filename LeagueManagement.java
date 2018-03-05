@@ -202,4 +202,79 @@ public class LeagueManagement
 
         return identifier;
     }
+	
+	
+	//love from RyAn 
+	public static String displayTeams() throws IOException //this method needs some work to make it more general
+	{
+		String teams="";
+		FileReader aFileReader = new FileReader("teams.txt");
+		Scanner in = new Scanner(aFileReader);
+		String aLineFromFile;
+		while(in.hasNext())
+		{
+			
+			aLineFromFile = in.nextLine();
+		    String single[] = aLineFromFile.split(",");
+			teams   += "\n" + single[1];
+			
+			
+		}
+		in.close();
+		aFileReader.close();
+		return teams;
+	}
+	
+	
+	
+	//Love From rYaN
+	public static void createAdmin() throws IOException  //creates admin username and password and stores them in the file administrator.txt already made by rian 
+	{
+		int lastNumber, newNumber;
+		String adminName , password;
+		
+		FileWriter aFileWriter = new FileWriter("administrator.txt", true);
+		printWriter out = new PrintWriter(aFileWriter);
+		
+		lastNumber = LeagueManagementRyan.checklastnumber();
+		newNumber = lastNumber + 1 ;
+		
+		while( true )
+		{
+			adminName = JOptionPane.showInputDialog(null,"Please enter the username you wish to use:","CreateAdmin",1);
+			adminName = adminName.trim();
+			if ( adminName != null)
+			{
+				if( adminName.MitchPattern())
+				{
+					password = JOptionPane.showInputDialog(null,"Please enter the password you wish to use:","CreatePassword",1);
+					password = password.trim();
+						
+					if( password != null)
+					{
+						if(password.MitchPattern())
+						{
+							out.println(newNumber +","+adminName+"," + password);
+							break;
+						}
+						else
+						{
+							JOptionPane.showMessageDialog(null,"The password you entered is invalid!","PasswordError",1);
+							 // need some sort of break here to go back to the enter password thing
+						}
+					}
+				else
+				{
+					JOptionPane.showMessageDialog(null,"The user name you entered is invalid!","UserNameError",1);
+					 //need some sort of break here to go back to the enter username thing
+				}
+				
+				}
+			}		
+		
+		}
+		out.close();
+		aFileWriter.close();
+	}
+	
 }
