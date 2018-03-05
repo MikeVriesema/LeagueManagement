@@ -282,4 +282,46 @@ public class LeagueManagement
 		aFileWriter.close();
 	}
 	
+	//Mitch,general plaintext string check against pattern
+	public static boolean stringCheck(String input) 
+	{
+		String pattern = "[a-z A-Z]{1,20}"; 
+		return(input.matches(pattern));
+	}
+	
+	//Mitch,password against pattern
+	public static boolean integerCheck(int input) 
+	{
+		String resultInt = ""+input;
+		String pattern = "[0-9]{1,500}"; 
+		return(resultInt.matches(pattern));
+	}
+	
+	//Mitch,general number check against pattern 
+	public static boolean passwordCheck(String input) 
+	{
+		String resultPassword = ""+input;
+		String pattern = "[A-Za-Z0-9]{5,30}"; 
+		return(resultPassword.matches(pattern));
+	}
+	
+	//Mitch,general delete league method 
+	public static void deleteLeague(File admin,String username) throws IOException
+	{
+		String blank = "";
+		FileReader aFileReader = new FileReader("leagues.txt");
+		Scanner in = new Scanner(aFileReader);
+		FileWriter aFileWriter = new FileWriter("leagues.txt");
+		PrintWriter out = new PrintWriter(aFileWriter);
+		String leagueLine;
+		int idNum = findIdentifierNumber(admin,username.toString());
+		while(in.hasNext()) //for(int i = 0; i < lineNumber && in.hasNext(); i++)
+		{
+				
+		}
+		in.close();
+		aFileReader.close();
+		out.close();
+		aFileWriter.close();
+	}		
 }
