@@ -7,56 +7,81 @@ import java.util.*;
 
 public class LeagueManagement
 {
+    static StringBuilder username;
+    static int usernameID;
+    static File admin;
+    static File leagues;
+
     public static void main(String[] args) throws IOException
     {
         boolean loggedIn = false;
-        File admin = new File("administrators.txt");
-        File leagues = new File("leagues.txt");
-        String options[] = {"Log in", "Create new Admin", "Quit"};
+        admin = new File("administrators.txt");
+        leagues = new File("leagues.txt");
+        String options[] = {"Log in", "Create New Admin", "Quit"};
+	    String tableOptions[] = {"Create League", "Manage Existing League", "Log out", "Ouit"};
         int choice = 0;
-        String loggedInUser = "Not logged in\n\n";
-        StringBuilder username = new StringBuilder("");
-        checkSetup(admin, leagues);
+	    int choice2 = 0;
+        String loggedInUser = "You are currently not logged in:\n\n";
+        username = new StringBuilder("");
 
-        do
+        checkSetup(admin, leagues);
+      
+		do
         {
             if(!loggedIn)
             {
-                choice = JOptionPane.showOptionDialog(null, loggedInUser + "select an action", "League Manager",JOptionPane.YES_NO_OPTION, 
+                choice = JOptionPane.showOptionDialog(null, loggedInUser + "What would you like to do?", "League Manager",JOptionPane.YES_NO_OPTION, 
                                                     1, null, options, options[0]);
 
                 if(choice == 0)
                 {
                     loggedIn = logInSequence(admin, username);
                     if(loggedIn)
-                        loggedInUser = "Logged in as: " + username + "\n\n";
+                        loggedInUser = "Logged in: " + username + "\n\n";
+                        usernameID = findAdminIdentifierNumber(username.toString()); //sets global varibale to the logged in users ID
+                }
+                else if(choice == 1)
+                {
+
                 }
             }
+			//losg
             else
-                choice = JOptionPane.showOptionDialog(null, loggedInUser + "select an action", "League Manager",JOptionPane.YES_NO_OPTION, 
-                                                    1, null, options, options[0]);
-        }while(choice != 2);
+            {
+                choice2 = JOptionPane.showOptionDialog(null, loggedInUser + "Select a Menu:", "League Manager",JOptionPane.YES_NO_OPTION, 
+                                                    1, null, tableOptions, options[0]);
+													
+				if (choice2 == 2){
+					
+					username = new StringBuilder("");
+					loggedIn = false;
+					loggedInUser = "Not logged in:\n\n";
+					choice2 = 0;
+				}
+            }	
+        }while(choice != 2 && choice2 !=3);
     }
 
-    public static boolean logInSequence(File adminFile, StringBuilder user) throws IOException
+
+    public static boolean logInSequence(File admin, StringBuilder user) throws IOException
     {
         boolean loggedIn = false;
         String inputName = "";
         String inputPassword = "";
-        String namePattern = "[a-zA-Z]{1,}";
         String passwordPattern = "[a-zA-Z0-9]{5,}";
 
 
         inputName = JOptionPane.showInputDialog(null, "Please enter admin name");
         if(inputName != null)
         {
-            if(inputName.matches(namePattern))
+            if(doesInputExist(admin, inputName, false))
             {
-                if(doesInputExist(adminFile, inputName, false))
+                String temp[];
+                int attempts = 0;
+                int index = findAdminIdentifierNumber(inputName);
+                temp = stringAtLineNumber(admin, index).split(",");
+                while(attempts < 3)
                 {
-                    String temp[];
-                    int index = findIdentifierNumber(adminFile, inputName);
-                    temp = stringAtLineNumber(adminFile, index).split(",");
                     inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]);
                     if(inputPassword != null)
                     {
@@ -65,21 +90,30 @@ public class LeagueManagement
                             JOptionPane.showMessageDialog(null, "Succesfully logged in!");
                             user.append(temp[1]);
                             loggedIn = true;
+                            break;
                         }
-                        else
-                            JOptionPane.showMessageDialog(null, "Incorrect password");
+                        else if(attempts < 3)
+                        {
+                            if(attempts == 2)
+                            {
+                                attempts++;
+                                JOptionPane.showMessageDialog(null, "No attempts left!");
+                            }
+                            else
+                            {    
+                                attempts++;
+                                JOptionPane.showMessageDialog(null, "Incorrect password\n" + (3 - attempts) + " attempts left");
+                            }
+                        }
                     }
-                }
-                else
-                {
-                    JOptionPane.showMessageDialog(null, inputName + " is not an existing admin");
+                    else
+                        break;
                 }
             }
             else
-            {
-                JOptionPane.showMessageDialog(null, inputName + " does not match the username format");
-            }
+                JOptionPane.showMessageDialog(null, inputName + " is not an existing admin");
         }
+
         return loggedIn;
     }
     //Rian
@@ -152,31 +186,124 @@ public class LeagueManagement
     }
 
     //Modified by Rian
-    public static int findIdentifierNumber(File aFile, String adminName) throws IOException
+    public static int findAdminIdentifierNumber(String adminName) throws IOException
     {
         int identifier = 0;
-        Scanner in = new Scanner(aFile);
+        Scanner in = new Scanner(admin);
         String aLineFromFile = "";
         
-        if(aFile.exists())
+        
+        
+        while(in.hasNext())
         {
-            while(in.hasNext())
-            {
-                aLineFromFile = in.nextLine();
-                String temp[] = aLineFromFile.split(",");
+            aLineFromFile = in.nextLine();
+            String temp[] = aLineFromFile.split(",");
 
-                if(temp[1].toLowerCase().equals(adminName))
-                {
-                    identifier = Integer.parseInt(temp[0]);
-                    break;
-                }
+            if(temp[1].toLowerCase().equals(adminName.toLowerCase()))
+            {
+                identifier = Integer.parseInt(temp[0]);
+                break;
             }
         }
-        else 
-            JOptionPane.showMessageDialog(null, "This admin does not exist");
-        
         in.close();
 
         return identifier;
     }
+	
+	
+	//love from RyAn 
+	public static String displayTeams() throws IOException //this method needs some work to make it more general
+	{
+		String teams="";
+		FileReader aFileReader = new FileReader("teams.txt");
+		Scanner in = new Scanner(aFileReader);
+		String aLineFromFile;
+		while(in.hasNext())
+		{
+			
+			aLineFromFile = in.nextLine();
+		    String single[] = aLineFromFile.split(",");
+			teams   += "\n" + single[1];
+			
+			
+		}
+		in.close();
+		aFileReader.close();
+		return teams;
+	}
+	
+	
+	
+	//Love From rYaN
+	/*public static void createAdmin() throws IOException  //creates admin username and password and stores them in the file administrator.txt already made by rian 
+	{
+		int lastNumber, newNumber;
+        String adminName , password;
+        boolean userCreated = false;
+		
+		FileWriter aFileWriter = new FileWriter(admin, true); 
+		PrintWriter out = new PrintWriter(aFileWriter);
+		
+		lastNumber = LeagueManagementRyan.checklastnumber();
+		newNumber = lastNumber + 1 ;
+		
+		while(userCreated == false)
+		{
+			adminName = JOptionPane.showInputDialog(null,"Please enter the username you wish to use:","CreateAdmin",1);
+			adminName = adminName.trim();
+			if ( adminName != null)
+			{
+				if(stringCheck(adminName))
+				{
+                    while(true)
+                    {
+                        password = JOptionPane.showInputDialog(null,"Please enter the password you wish to use:","CreatePassword",1);
+                        password = password.trim();
+                        
+                        if(password != null)
+                        {
+                            if(passwordCheck(password))
+                            {
+                                out.println(newNumber +","+adminName+"," + password);
+                                userCreated = true;
+                                break;
+                            }
+                            else
+                            {
+                                JOptionPane.showMessageDialog(null,"The password you entered is invalid!","PasswordError",1);
+                            }
+                        }
+                    }
+                }
+				else
+				{
+					JOptionPane.showMessageDialog(null,"The user name you entered is invalid!","UserNameError",1);
+				}
+            }		
+        }   
+		out.close();
+		aFileWriter.close();
+	}*/
+    
+    public static boolean stringCheck(String input) 
+	{
+		String pattern = "[a-z A-Z]{1,20}"; 
+		return(input.matches(pattern));
+	}
+	
+	//Mitch,password against pattern
+	public static boolean integerCheck(int input) 
+	{
+		String resultInt = ""+input;
+		String pattern = "[0-9]{1,500}"; 
+		return(resultInt.matches(pattern));
+	}
+	
+	//Mitch,general number check against pattern 
+	public static boolean passwordCheck(String input) 
+	{
+		String resultPassword = ""+input;
+		String pattern = "[A-Za-Z0-9]{5,30}"; 
+		return(resultPassword.matches(pattern));
+	}
 }
