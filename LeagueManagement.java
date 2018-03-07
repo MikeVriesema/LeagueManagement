@@ -326,15 +326,15 @@ public class LeagueManagement
 				}
             }
         }   
-		in.close;
+		in.close();
 		editleague(tableDropDown);
 		return tableDropDown;
 	}
 	
 	//Mitch, returns an arraylist of league IDs that match the logged in admin
-	public static ArrayList<int> getAdminLeagueIDs() throws IOException 
+	public static ArrayList<Integer> getAdminLeagueIDs() throws IOException 
 	{
-		ArrayList<int> leagueIDs = new Arraylist<int>();
+		ArrayList<Integer> leagueIDs = new Arraylist<int>();
         Scanner in = new Scanner(leagues);
         while(in.hasNextLine())
         {   
@@ -348,7 +348,7 @@ public class LeagueManagement
 				}
             }
         }   
-		in.close;
+		in.close();
 		return leagueIDs;
 	}
 	/**
