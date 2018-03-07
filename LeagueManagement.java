@@ -244,9 +244,9 @@ public class LeagueManagement
 	}
 	
 	
-	
-	//Love From rYaN
-	int lastNumber, newNumber;
+	public static void createAdmin() throws IOException  //creates admin username and password and stores them in the file administrator.txt already made by rian 
+	{
+		int lastNumber, newNumber;
         String adminName , password;
         boolean userCreated = false;
 		
