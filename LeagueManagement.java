@@ -1,8 +1,7 @@
 /**
  * LeagueManagement
  */
-import javax.swing.table.DefaultTableModel;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 import java.io.*;
 import java.util.*;
 
@@ -10,19 +9,22 @@ public class LeagueManagement
 {
     static StringBuilder username;
     static int usernameID;
-
+    static File admin;
+    static File leagues;
+    
     public static void main(String[] args) throws IOException
     {
         boolean loggedIn = false;
-        File admin = new File("administrators.txt");
-        File leagues = new File("leagues.txt");
+        admin = new File("administrators.txt");
+        leagues = new File("leagues.txt");
         String options[] = {"Log in", "Create New Admin", "Quit"};
 	    String tableOptions[] = {"Create League", "Manage Existing League", "Log out", "Ouit"};
         int choice = 0;
 	    int choice2 = 0;
         String loggedInUser = "You are currently not logged in:\n\n";
         username = new StringBuilder("");
-        checkSetup(admin, leagues);
+        
+        checkSetup();
       
 		do
         {
@@ -36,7 +38,11 @@ public class LeagueManagement
                     loggedIn = logInSequence(admin, username);
                     if(loggedIn)
                         loggedInUser = "Logged in: " + username + "\n\n";
-                        usernameID = findIdentifierNumber(admin, username.toString());
+                        usernameID = findAdminIdentifierNumber(username.toString());
+                }
+                else if(choice == 1)
+                {
+                    createAdmin();
                 }
             }
 			//losg
@@ -60,27 +66,25 @@ public class LeagueManagement
 
     public static boolean logInSequence(File adminFile, StringBuilder user) throws IOException
     {
-        boolean loggedIn = false;
+         boolean loggedIn = false;
         String inputName = "";
         String inputPassword = "";
-        String passwordPattern = "[a-zA-Z0-9]{5,}";
-
 
         inputName = JOptionPane.showInputDialog(null, "Please enter admin name");
         if(inputName != null)
         {
-            if(doesInputExist(adminFile, inputName, false))
+            if(doesInputExist(admin, inputName, false))
             {
                 String temp[];
                 int attempts = 0;
-                int index = findIdentifierNumber(adminFile, inputName);
-                temp = stringAtLineNumber(adminFile, index).split(",");
+                int index = findAdminIdentifierNumber(inputName);
+                temp = stringAtLineNumber(admin, index).split(",");
                 while(attempts < 3)
                 {
                     inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]);
                     if(inputPassword != null)
                     {
-                        if(inputPassword.matches(passwordPattern) && inputPassword.equals(temp[2]))
+                        if(passwordCheck(inputPassword) && inputPassword.equals(temp[2]))
                         {
                             JOptionPane.showMessageDialog(null, "Succesfully logged in!");
                             user.append(temp[1]);
@@ -114,25 +118,29 @@ public class LeagueManagement
     //Rian
     public static void checkSetup(File input1, File input2) throws IOException
     {
-        if(!input1.exists() && !input2.exists())
+         if(!admin.exists() && !leagues.exists())
         {
-            FileWriter file1 = new FileWriter(input1);
-            FileWriter file2 = new FileWriter(input2);
+            FileWriter file1 = new FileWriter(admin);
+            FileWriter file2 = new FileWriter(leagues);
             file1.close();
             file2.close();
         }
-        else if(!input1.exists())
+        else if(!admin.exists())
         {
-            FileWriter file1 = new FileWriter(input1);
+            FileWriter file1 = new FileWriter(admin);
             file1.close();
         }
-        else if(!input2.exists())
+        else if(!leagues.exists())
         {
-            FileWriter file2 = new FileWriter(input2);
+            FileWriter file2 = new FileWriter(leagues);
             file2.close();
         }
     }
     //Rian
+     /*
+    DoesInputExist - returns a boolean saying whether a provided string exists in a file
+    Inputs - filename: file to search, input: string to search for, caseSensitive - use for case sensitivity
+    */
     public static boolean doesInputExist(File filename, String input, boolean caseSensitive) throws IOException
     {
         if(filename.exists())
@@ -165,6 +173,11 @@ public class LeagueManagement
     }
 
     //Rian
+    /*
+    stringAtLineNumber - returns the string at the line of a provided file
+    Inputs - file: file to be searched, lineNumber - the linenumber you want the string of
+    Searches the file using a loop with index of lneNumber to get the string and return it
+    */ 
     public static String stringAtLineNumber(File file, int lineNumber) throws IOException
     {
         String result = "";
@@ -181,29 +194,28 @@ public class LeagueManagement
     }
 
     //Modified by Rian
-    public static int findIdentifierNumber(File aFile, String adminName) throws IOException
+    /*
+    findAdminIdentifierNumber - returns the identifier number of a provided admin
+    Inputs - adminName: name of admin whose ID you want to get
+    Searches for admin name in the file, splits on comma and returns the int ID
+    */
+     public static int findAdminIdentifierNumber(String adminName) throws IOException
     {
         int identifier = 0;
-        Scanner in = new Scanner(aFile);
+        Scanner in = new Scanner(admin);
         String aLineFromFile = "";
         
-        if(aFile.exists())
+        while(in.hasNext())
         {
-            while(in.hasNext())
-            {
-                aLineFromFile = in.nextLine();
-                String temp[] = aLineFromFile.split(",");
+            aLineFromFile = in.nextLine();
+            String temp[] = aLineFromFile.split(",");
 
-                if(temp[1].toLowerCase().equals(adminName.toLowerCase()))
-                {
-                    identifier = Integer.parseInt(temp[0]);
-                    break;
-                }
+            if(temp[1].toLowerCase().equals(adminName.toLowerCase()))
+            {
+                identifier = Integer.parseInt(temp[0]);
+                break;
             }
         }
-        else 
-            JOptionPane.showMessageDialog(null, "This admin does not exist");
-        
         in.close();
 
         return identifier;
@@ -234,51 +246,58 @@ public class LeagueManagement
 	
 	
 	//Love From rYaN
-	public static void createAdmin() throws IOException  //creates admin username and password and stores them in the file administrator.txt already made by rian 
-	{
-		int lastNumber, newNumber;
-		String adminName , password;
+	int lastNumber, newNumber;
+        String adminName , password;
+        boolean userCreated = false;
 		
-		FileWriter aFileWriter = new FileWriter("administrator.txt", true);
-		printWriter out = new PrintWriter(aFileWriter);
+		FileWriter aFileWriter = new FileWriter(admin, true); 
+		PrintWriter out = new PrintWriter(aFileWriter);
 		
-		lastNumber = LeagueManagementRyan.checklastnumber();
+		lastNumber = findLastAdminNumber();
 		newNumber = lastNumber + 1 ;
 		
-		while( true )
+		while(userCreated == false)
 		{
 			adminName = JOptionPane.showInputDialog(null,"Please enter the username you wish to use:","CreateAdmin",1);
-			adminName = adminName.trim();
-			if ( adminName != null)
+			if (adminName != null)
 			{
-				if( adminName.MitchPattern())
+                adminName = adminName.trim();
+				if(stringCheck(adminName))
 				{
-					password = JOptionPane.showInputDialog(null,"Please enter the password you wish to use:","CreatePassword",1);
-					password = password.trim();
-						
-					if( password != null)
-					{
-						if(password.MitchPattern())
-						{
-							out.println(newNumber +","+adminName+"," + password);
-							break;
-						}
-						else
-						{
-							JOptionPane.showMessageDialog(null,"The password you entered is invalid!","PasswordError",1);
-							 // need some sort of break here to go back to the enter password thing
-						}
-					}
+                    if(!doesInputExist(admin, adminName, false))
+                    {
+                        while(true)
+                        {
+                            password = JOptionPane.showInputDialog(null,"Please enter the password you wish to use:","CreatePassword",1);
+                            if(password != null)
+                            {
+                                password = password.trim();
+                                if(passwordCheck(password))
+                                {
+                                    out.println(newNumber +","+adminName+"," + password);
+                                    userCreated = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    JOptionPane.showMessageDialog(null,"The password you entered is invalid!","PasswordError",1);
+                                }
+                            }
+                            else
+                                break;
+                        }
+                    }
+                    else
+                        JOptionPane.showMessageDialog(null, "This username is not available");
+                }
 				else
 				{
 					JOptionPane.showMessageDialog(null,"The user name you entered is invalid!","UserNameError",1);
-					 //need some sort of break here to go back to the enter username thing
 				}
-				
-				}
-			}		
-		
-		}
+            }
+            else
+                break;		
+        }   
 		out.close();
 		aFileWriter.close();
 	}
@@ -306,6 +325,59 @@ public class LeagueManagement
         return(resultPassword.matches(pattern));
     }
 	
+    /*
+    Returns the number of the last admin in the administrators file
+    Inputs - None
+    Loops through every line until the end is reached, splits the last line on a comma
+    returns the ID number
+    */
+    public static int findLastAdminNumber() throws IOException
+    {
+        int idNumber = 0;
+        Scanner in = new Scanner(admin);
+        String lastLine = "";
+
+        if(admin.length() == 0)
+        {    
+            in.close();
+            return 0;
+        }
+        else
+        {
+            while(in.hasNext())
+                lastLine = in.nextLine();
+        
+            idNumber = Integer.parseInt(lastLine.substring(0, lastLine.indexOf(",")));
+            in.close();
+            return idNumber;
+        }
+    }
+    
+    //Rian
+    /*
+    inputLeagueParticipants - Input participants until cancelled is pressed
+    Each input of the JOPtionpane is placed into an ArrayList. The array list is returned
+    */
+    public static ArrayList<String> inputLeagueParticipants()
+    {
+        ArrayList<String> participants = new ArrayList<String>();
+        String input = "";
+
+        while(true)
+        {
+            input = JOptionPane.showInputDialog(null, "Input participant");
+            if(input != null)
+                if(stringCheck(input))
+                    participants.add(input);
+                else
+                    JOptionPane.showMessageDialog(null, "Incorrect format of participant");
+            else
+                break;
+        }
+
+        return participants;
+    }
+
 	//Mitch,//identify league admin
 	public static void getAdminLeagues() throws IOException 
         FileReader aFileReader = new FileReader("leagues.txt");
