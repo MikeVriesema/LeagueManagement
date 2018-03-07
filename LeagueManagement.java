@@ -1,7 +1,7 @@
 /**
  * LeagueManagement
  */
-import javax.swing.JOptionPane;
+import javax.swing.*;
 import java.io.*;
 import java.util.*;
 
@@ -11,7 +11,7 @@ public class LeagueManagement
     static int usernameID;
     static File admin;
     static File leagues;
-
+    
     public static void main(String[] args) throws IOException
     {
         boolean loggedIn = false;
@@ -23,9 +23,9 @@ public class LeagueManagement
 	    int choice2 = 0;
         String loggedInUser = "You are currently not logged in:\n\n";
         username = new StringBuilder("");
+        
+        checkSetup(); //Setup admin and league files
 
-        checkSetup(admin, leagues);
-      
 		do
         {
             if(!loggedIn)
@@ -38,16 +38,18 @@ public class LeagueManagement
                     loggedIn = logInSequence(admin, username);
                     if(loggedIn)
                         loggedInUser = "Logged in: " + username + "\n\n";
-                        usernameID = findAdminIdentifierNumber(username.toString()); //sets global varibale to the logged in users ID
+                        usernameID = findAdminIdentifierNumber(username.toString());
                 }
                 else if(choice == 1)
                 {
-
+                    /*String choice3 = JOptionPane.showInputDialog(null, "Enter admin to delete");
+                    if(choice3 != null)
+                        deleteAdmin(choice3);
+                    */
                 }
             }
 			//losg
             else
-            {
                 choice2 = JOptionPane.showOptionDialog(null, loggedInUser + "Select a Menu:", "League Manager",JOptionPane.YES_NO_OPTION, 
                                                     1, null, tableOptions, options[0]);
 													
@@ -56,20 +58,18 @@ public class LeagueManagement
 					username = new StringBuilder("");
 					loggedIn = false;
 					loggedInUser = "Not logged in:\n\n";
-					choice2 = 0;
+					choice2 = 0;	
 				}
-            }	
+				
         }while(choice != 2 && choice2 !=3);
     }
 
 
-    public static boolean logInSequence(File admin, StringBuilder user) throws IOException
+    public static boolean logInSequence(File adminFile, StringBuilder user) throws IOException
     {
-        boolean loggedIn = false;
+         boolean loggedIn = false;
         String inputName = "";
         String inputPassword = "";
-        String passwordPattern = "[a-zA-Z0-9]{5,}";
-
 
         inputName = JOptionPane.showInputDialog(null, "Please enter admin name");
         if(inputName != null)
@@ -85,7 +85,7 @@ public class LeagueManagement
                     inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]);
                     if(inputPassword != null)
                     {
-                        if(inputPassword.matches(passwordPattern) && inputPassword.equals(temp[2]))
+                        if(passwordCheck(inputPassword) && inputPassword.equals(temp[2]))
                         {
                             JOptionPane.showMessageDialog(null, "Succesfully logged in!");
                             user.append(temp[1]);
@@ -117,27 +117,31 @@ public class LeagueManagement
         return loggedIn;
     }
     //Rian
-    public static void checkSetup(File input1, File input2) throws IOException
+    public static void checkSetup() throws IOException
     {
-        if(!input1.exists() && !input2.exists())
+         if(!admin.exists() && !leagues.exists())
         {
-            FileWriter file1 = new FileWriter(input1);
-            FileWriter file2 = new FileWriter(input2);
+            FileWriter file1 = new FileWriter(admin);
+            FileWriter file2 = new FileWriter(leagues);
             file1.close();
             file2.close();
         }
-        else if(!input1.exists())
+        else if(!admin.exists())
         {
-            FileWriter file1 = new FileWriter(input1);
+            FileWriter file1 = new FileWriter(admin);
             file1.close();
         }
-        else if(!input2.exists())
+        else if(!leagues.exists())
         {
-            FileWriter file2 = new FileWriter(input2);
+            FileWriter file2 = new FileWriter(leagues);
             file2.close();
         }
     }
     //Rian
+     /*
+    DoesInputExist - returns a boolean saying whether a provided string exists in a file
+    Inputs - filename: file to search, input: string to search for, caseSensitive - use for case sensitivity
+    */
     public static boolean doesInputExist(File filename, String input, boolean caseSensitive) throws IOException
     {
         if(filename.exists())
@@ -170,6 +174,11 @@ public class LeagueManagement
     }
 
     //Rian
+    /*
+    stringAtLineNumber - returns the string at the line of a provided file
+    Inputs - file: file to be searched, lineNumber - the linenumber you want the string of
+    Searches the file using a loop with index of lneNumber to get the string and return it
+    */ 
     public static String stringAtLineNumber(File file, int lineNumber) throws IOException
     {
         String result = "";
@@ -186,13 +195,16 @@ public class LeagueManagement
     }
 
     //Modified by Rian
-    public static int findAdminIdentifierNumber(String adminName) throws IOException
+    /*
+    findAdminIdentifierNumber - returns the identifier number of a provided admin
+    Inputs - adminName: name of admin whose ID you want to get
+    Searches for admin name in the file, splits on comma and returns the int ID
+    */
+     public static int findAdminIdentifierNumber(String adminName) throws IOException
     {
         int identifier = 0;
         Scanner in = new Scanner(admin);
         String aLineFromFile = "";
-        
-        
         
         while(in.hasNext())
         {
@@ -233,9 +245,7 @@ public class LeagueManagement
 	}
 	
 	
-	
-	//Love From rYaN
-	/*public static void createAdmin() throws IOException  //creates admin username and password and stores them in the file administrator.txt already made by rian 
+	public static void createAdmin() throws IOException  //creates admin username and password and stores them in the file administrator.txt already made by rian 
 	{
 		int lastNumber, newNumber;
         String adminName , password;
@@ -244,66 +254,359 @@ public class LeagueManagement
 		FileWriter aFileWriter = new FileWriter(admin, true); 
 		PrintWriter out = new PrintWriter(aFileWriter);
 		
-		lastNumber = LeagueManagementRyan.checklastnumber();
+		lastNumber = findLastAdminNumber();
 		newNumber = lastNumber + 1 ;
 		
 		while(userCreated == false)
 		{
 			adminName = JOptionPane.showInputDialog(null,"Please enter the username you wish to use:","CreateAdmin",1);
-			adminName = adminName.trim();
-			if ( adminName != null)
+			if (adminName != null)
 			{
+                adminName = adminName.trim();
 				if(stringCheck(adminName))
 				{
-                    while(true)
+                    if(!doesInputExist(admin, adminName, false))
                     {
-                        password = JOptionPane.showInputDialog(null,"Please enter the password you wish to use:","CreatePassword",1);
-                        password = password.trim();
-                        
-                        if(password != null)
+                        while(true)
                         {
-                            if(passwordCheck(password))
+                            password = JOptionPane.showInputDialog(null,"Please enter the password you wish to use:","CreatePassword",1);
+                            if(password != null)
                             {
-                                out.println(newNumber +","+adminName+"," + password);
-                                userCreated = true;
-                                break;
+                                password = password.trim();
+                                if(passwordCheck(password))
+                                {
+                                    out.println(newNumber +","+adminName+"," + password);
+                                    userCreated = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    JOptionPane.showMessageDialog(null,"The password you entered is invalid!","PasswordError",1);
+                                }
                             }
                             else
-                            {
-                                JOptionPane.showMessageDialog(null,"The password you entered is invalid!","PasswordError",1);
-                            }
+                                break;
                         }
                     }
+                    else
+                        JOptionPane.showMessageDialog(null, "This username is not available");
                 }
 				else
 				{
 					JOptionPane.showMessageDialog(null,"The user name you entered is invalid!","UserNameError",1);
 				}
-            }		
+            }
+            else
+                break;		
         }   
 		out.close();
 		aFileWriter.close();
-	}*/
-    
+	}
+	
+	//Mitch,string check against pattern
     public static boolean stringCheck(String input) 
-	{
-		String pattern = "[a-z A-Z]{1,20}"; 
-		return(input.matches(pattern));
-	}
+    {
+        String pattern = "[a-z A-Z]{1,20}"; 
+        return(input.matches(pattern));
+    }
+
+    //Mitch,number against pattern
+    public static boolean integerCheck(int input) 
+    {
+        String resultInt = ""+input;
+        String pattern = "[0-9]{1,500}"; 
+        return(resultInt.matches(pattern));
+    }
+
+    //Mitch,general password check against pattern 
+    public static boolean passwordCheck(String input) 
+    {
+        String resultPassword = ""+input;
+        String pattern = "[A-Za-Z0-9]{5,30}"; 
+        return(resultPassword.matches(pattern));
+    }
 	
-	//Mitch,password against pattern
-	public static boolean integerCheck(int input) 
-	{
-		String resultInt = ""+input;
-		String pattern = "[0-9]{1,500}"; 
-		return(resultInt.matches(pattern));
-	}
+    /*
+    Returns the number of the last admin in the administrators file
+    Inputs - None
+    Loops through every line until the end is reached, splits the last line on a comma
+    returns the ID number
+    */
+    public static int findLastAdminNumber() throws IOException
+    {
+        int idNumber = 0;
+        Scanner in = new Scanner(admin);
+        String lastLine = "";
+
+        if(admin.length() == 0)
+        {    
+            in.close();
+            return 0;
+        }
+        else
+        {
+            while(in.hasNext())
+                lastLine = in.nextLine();
+        
+            idNumber = Integer.parseInt(lastLine.substring(0, lastLine.indexOf(",")));
+            in.close();
+            return idNumber;
+        }
+    }
+    
+    //Rian
+    /*
+    inputLeagueParticipants - Input participants until cancelled is pressed
+    Each input of the JOPtionpane is placed into an ArrayList. The array list is returned
+    */
+    public static ArrayList<String> inputLeagueParticipants()
+    {
+        ArrayList<String> participants = new ArrayList<String>();
+        String input = "";
+
+        while(true)
+        {
+            input = JOptionPane.showInputDialog(null, "Input participant");
+            if(input != null)
+                if(stringCheck(input))
+                    participants.add(input);
+                else
+                    JOptionPane.showMessageDialog(null, "Incorrect format of participant");
+            else
+                break;
+        }
+
+        return participants;
+    }
+
+	//Mitch,//identify league admin
+    // public static void getAdminLeagues() throws IOException
+    // {
+    //     FileReader aFileReader = new FileReader("leagues.txt");
+    //     Scanner in = new Scanner(aFileReader);
+    //     //int idNum = findIdentifierNumber(admin,username.toString());
+	// 	int i = 0;
+    //     while(in.hasNextLine())
+    //     {   
+    //         String data = in.nextLine();
+    //         if(data.contains(","))
+    //         { 
+    //             leagueAdminNum=(data.substring((data.lastIndexOf(",")+1)));
+	// 			if(usernameID ==  Integer.parseInt(leagueAdminNum))
+	// 			{
+	// 				leagueInsert=(data.substring((data.indexOf(",")+1), data.lastIndexOf(","))); 
+	// 				tableChoices[i]=leagueInsert;
+	// 				i++;
+	// 			}
+    //         }
+    //     }   
+	// 	in.close();
+    //     aFileReader.close();
+    //     out.close();
+    //     aFileWriter.close();
+	// }
+	/**
+	\\MITCH// FOR LATER
+	public static void getAdminLeagues() throws IOException
+    {
+        ArrayList<ArrayList<String>> leagues = new ArrayList<ArrayList<String>>();
+        String filename = "leagues.txt";
+        String fileError = filename + " not found";
+        String leagueError = "No leagues created";
+        File leaguesFile = new File(filename);
+        String leagueElements[];
+        int    leagueAdminID, adminID;
+        boolean found = false;
+        if (!(leaguesFile.exists()))
+        {
+            System.out.println(fileError);
+        }
+        else if (leaguesFile.length() == 0)
+        {
+            System.out.println(leagueError);
+        }
+        else
+        {
+            Scanner in = new Scanner(leaguesFile);
+            leagues.add(new ArrayList<String>());
+            leagues.add(new ArrayList<String>());
+            leagues.add(new ArrayList<String>());
+            while (in.hasNext())
+            {
+                leagueElements = (in.nextLine()).split(",");
+                for (int i = 0; i < leagueElements.length; i++)
+                {
+                    (leagues.get(i)).add(leagueElements[i]);
+                }
+            }
+            in.close();
+            for (int list = 0; list < leagues.size(); list++)
+            {
+                for (int item = 0; item < leagues.get(list).size(); item++)
+                {
+                    System.out.println(leagues.get(list).get(item));
+                }
+            }
+        }
+    }
+	**/
+
+    //Mitch,sort leagues for respective admin
+    // public static void editLeague() throws IOException //identify league
+    // {
+    //     String input = (String) JOptionPane.showInputDialog(null, "Choose a league to manage:",
+    //     "League Management",JOptionPane.QUESTION_MESSAGE, null, tableChoices,tableChoices[1]); 
+    //     in.close();	
+    // }
+
+	//Mitch,general delete league method 
+    public static void deleteLeague() throws IOException //identify league
+    {
+        
+    }
 	
-	//Mitch,general number check against pattern 
-	public static boolean passwordCheck(String input) 
+	//Mitch,Generation of League Table
+	// public static void generateLeagueTable()
+    // {
+    //     String[][] leagueTable = new String[][]{
+    //             {"1","leagues.get(i)","x","x","x","x","x"},
+    //             {"2","leagues.get(i)","x","x","x","x","x"},
+    //             {"3","leagues.get(i)","x","x","x","x","x"},
+    //             {"4","leagues.get(i)","x","x","x","x","x"},
+    //             {"5","leagues.get(i)","x","x","x","x","x"},
+    //             {"6","leagues.get(i)","x","x","x","x","x"},
+    //             {"7","leagues.get(i)","x","x","x","x","x"},
+    //             {"8","leagues.get(i)","x","x","x","x","x"}};
+    //     String[] columnNames = {"Position","Team","Games","Wins","Draws","Losses","Score"};
+    //     String[][] data = new String[leagueTable.length][leagueTable[0].length];
+    //     for (int i = 0; i < data.length; i++)
+    //     {
+    //         for (int j = 0; j < data[i].length; j++)
+    //         {
+    //             data[i][j] = leagueTable[i][j];
+    //         }
+    //     }
+	// 	//--Important table stuff
+    //     DefaultTableModel model = new DefaultTableModel(data, columnNames);
+    //     JTable table = new JTable(model);
+    //     JScrollPane scrollPane = new JScrollPane(table);
+	// 	//--Important table stuff
+    //     JOptionPane.showMessageDialog(null, scrollPane, "Output",JOptionPane.INFORMATION_MESSAGE);
+    // }
+
+    //Rian
+    /*
+    deleteAdmin - Deletes the admin which equals the provided admin.
+    Firstly deletes participant and results files from the league which the admin controls
+    secondly deletes the leagues which the admin controls
+    lastly deletes name from admin file
+    */
+    public static void deleteAdmin(String adminToDelete) throws IOException
+    {
+        if(doesInputExist(admin, adminToDelete, false)) //Check if the admin exists in the admin file
+        {
+            deleteLeagueTeamsAndResults(adminToDelete); //First delete teams and results
+            deleteLeague(adminToDelete); //Second delete the league
+
+            ArrayList<String> adminArray = new ArrayList<String>();
+            Scanner in = new Scanner(admin); //Delete admin
+
+            while(in.hasNext())
+            {
+                String data = in.nextLine();
+                if(!data.toLowerCase().contains(adminToDelete))
+                    adminArray.add(data);
+            }
+            in.close();
+            PrintWriter out = new PrintWriter(admin);
+
+            for(int i = 0; i < adminArray.size(); i++)
+                out.println(adminArray.get(i));
+            out.close();
+        }
+        else
+            JOptionPane.showMessageDialog(null, "Cannot delete this admin as it doesn't exist");
+    }
+
+    /*
+    getAdminLeagueIDs - returns an Integer ArrayList containing the leagueIDs which are managed by the 
+    inputted admin. This is done by comparing adminID with the owner ID of the league.
+    */
+    public static ArrayList<Integer> getAdminLeagueIDs(String adminName) throws IOException 
 	{
-		String resultPassword = ""+input;
-		String pattern = "[A-Za-Z0-9]{5,30}"; 
-		return(resultPassword.matches(pattern));
-	}
+		ArrayList<Integer> leagueIDs = new ArrayList<Integer>();
+        Scanner in = new Scanner(leagues);
+        while(in.hasNextLine())
+        {   
+            String data = in.nextLine();
+            if(data.contains(","))
+            { 
+                int leagueOwnerID = Integer.parseInt(data.substring(data.lastIndexOf(',') + 1));
+				if(findAdminIdentifierNumber(adminName) == leagueOwnerID)
+				{
+					int leagueAdminNum=Integer.parseInt(data.substring(0, 1));
+					leagueIDs.add(leagueAdminNum);
+				}
+            }
+        }   
+		in.close();
+		return leagueIDs;
+    }
+    
+    /*
+    deleteLeagueTeamsandResults - deltes the teams and results associated with the leagues that the provided
+    admin name owns
+    */
+    public static void deleteLeagueTeamsAndResults(String adminName) throws IOException
+    {
+        String participant = "_participants.txt";
+        String results = "_results.txt";
+
+        ArrayList<Integer> leagueIDNumbers = getAdminLeagueIDs(adminName);
+        for(int i = 0; i < leagueIDNumbers.size(); i++)
+        {
+            String tempParticipant = leagueIDNumbers.get(i) + participant;
+            File participantFile = new File(tempParticipant);
+            if(participantFile.exists())
+            {
+                String tempResults = leagueIDNumbers.get(i) + results;
+                File resultsFile = new File(tempResults);
+                if(resultsFile.exists())
+                {
+                    participantFile.delete();
+                    resultsFile.delete();
+                }
+            }
+        }
+    }
+
+    /*
+    Removes the leagues that the provided admin controls from the leagues.txt file
+    */
+    public static void deleteLeague(String adminName) throws IOException
+    {
+        ArrayList<String> leaguesToKeep = new ArrayList<String>();
+        ArrayList<Integer> deleteLeagueNumbers = getAdminLeagueIDs(adminName);
+        Scanner in = new Scanner(leagues);
+
+        while(in.hasNext()) //Fill String array
+        {
+            String data = in.nextLine();
+            leaguesToKeep.add(data);
+        }
+        in.close();
+
+        for(int i = 0; i < deleteLeagueNumbers.size(); i++) //Remove lines using ArrayList of lines to remove
+        {
+            for(int j = 0; j < leaguesToKeep.size(); j++)
+            {
+                if(leaguesToKeep.get(j).startsWith(deleteLeagueNumbers.get(i).toString()))
+                    leaguesToKeep.remove(j);
+            }
+        }
+        PrintWriter out = new PrintWriter(leagues);
+        for(int i = 0; i < leaguesToKeep.size(); i++)
+            out.println(leaguesToKeep.get(i));
+        out.close();
+    }
 }
