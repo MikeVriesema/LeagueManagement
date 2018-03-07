@@ -306,30 +306,50 @@ public class LeagueManagement
         return(resultPassword.matches(pattern));
     }
 	
-	//Mitch,//identify league admin
-	public static void getAdminLeagues() throws IOException 
-        FileReader aFileReader = new FileReader("leagues.txt");
-        Scanner in = new Scanner(aFileReader);
-        //int idNum = findIdentifierNumber(admin,username.toString());
+	//Mitch, returns an arraylist of leagues that match the logged in admin and forwards it to the dropdown option pane for management
+	public static void ArrayList<String> getAdminLeagues() throws IOException 
+	{
+        Scanner in = new Scanner(leagues);
 		int i = 0;
+		Arraylist<String> tableDropDown = new ArrayList<String>();
         while(in.hasNextLine())
         {   
             String data = in.nextLine();
             if(data.contains(","))
             { 
-                leagueAdminNum=(data.substring((data.lastIndexOf(",")+1)));
+                int leagueAdminNum=(data.substring((data.lastIndexOf(",")+1)));
 				if(usernameID ==  Integer.parseInt(leagueAdminNum))
 				{
-					leagueInsert=(data.substring((data.indexOf(",")+1), data.lastIndexOf(","))); 
-					tableChoices[i]=leagueInsert;
+					String leagueInsert=(data.substring((data.indexOf(",")+1), data.lastIndexOf(","))); 
+					tableDropDown.add(leagueInsert);
 					i++;
 				}
             }
         }   
-		in.close();
-        aFileReader.close();
-        out.close();
-        aFileWriter.close();
+		in.close;
+		editleague(tableDropDown);
+		return tableDropDown;
+	}
+	
+	//Mitch, returns an arraylist of league IDs that match the logged in admin
+	public static ArrayList<int> getAdminLeagueIDs() throws IOException 
+	{
+		ArrayList<int> leagueIDs = new Arraylist<int>();
+        Scanner in = new Scanner(leagues);
+        while(in.hasNextLine())
+        {   
+            String data = in.nextLine();
+            if(data.contains(","))
+            { 
+				if(usernameID == (leagueAdminNum))
+				{
+					int leagueAdminNum=Integer.parseInt(data.substring(1));
+					leagueIDs.add(leagueAdminNum);
+				}
+            }
+        }   
+		in.close;
+		return leagueIDs;
 	}
 	/**
 	\\MITCH// FOR LATER
