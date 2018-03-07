@@ -116,7 +116,7 @@ public class LeagueManagement
         return loggedIn;
     }
     //Rian
-    public static void checkSetup(File input1, File input2) throws IOException
+    public static void checkSetup() throws IOException
     {
          if(!admin.exists() && !leagues.exists())
         {
