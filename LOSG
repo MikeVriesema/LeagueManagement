@@ -1,0 +1,139 @@
+public static void generateFixtures() throws IOException
+  {
+	  
+	int numOfTeams, totalRounds, numOfMatchesPerRound;
+    int roundNum, matchNumber, homeTeamNum, awayTeamNum, even, odd;
+    boolean oddnumOfTeams = false;
+	
+	createFixtureFile();
+
+    String selection;
+    String [][] fixtures;
+    String [][] revisedFixtures;
+    String []   elements;
+    String fixtureAsText;
+    selection = getnumOfTeams("Team Number Entry", 
+                                 "Please enter a number in the range 2 to 99");
+
+    
+	
+	//***FILE STRUCTURE: FixtureNumber,HomeParticipant#,AwayParticipant#8*** 
+
+	//checks selection
+	if(selection != null){
+		
+		//if teams are odd, add one to number of teams 
+		numOfTeams = Integer.parseInt(selection);
+		if(numOfTeams % 2 == 1){
+			
+			numOfTeams++;
+			oddnumOfTeams = true; 
+			
+		}	
+
+	   totalRounds = numOfTeams - 1;
+       numOfMatchesPerRound = numOfTeams / 2;
+       fixtures = new String[totalRounds][numOfMatchesPerRound];  
+		
+		//needs to be replaced with a method to check the league number 
+		for (roundNum = 0; roundNum < totalRounds; roundNum++) 
+		{
+         for (matchNumber = 0; matchNumber < numOfMatchesPerRound; matchNumber++) 
+	     {
+           homeTeamNum = (roundNum + matchNumber) % (numOfTeams - 1);
+		   awayTeamNum = (numOfTeams - 1 - matchNumber + roundNum) % (numOfTeams - 1);
+           if (matchNumber == 0) 
+             awayTeamNum = numOfTeams - 1;
+		  fixtures[roundNum][matchNumber]  = (homeTeamNum + 1) + "," + (awayTeamNum + 1) + "\n";
+         }	
+       } 
+	   
+	   
+	   revisedFixtures = new String[totalRounds][numOfMatchesPerRound];
+       even = 0;
+       odd = numOfTeams / 2;	
+       for (int i = 0; i < fixtures.length; i++) 
+       {
+         if (i % 2 == 0) 	
+           revisedFixtures[i] = fixtures[even++];
+         else 				
+           revisedFixtures[i] = fixtures[odd++];
+       }
+       fixtures = revisedFixtures;
+        
+       for (roundNum = 0; roundNum < fixtures.length; roundNum++) 
+       {
+         if (roundNum % 2 == 1) 
+	     {
+	       fixtureAsText = fixtures[roundNum][0];
+	       elements = fixtureAsText.split(",");
+           fixtures[roundNum][0] = elements[1] + "," + elements[0];
+	     }
+       } 
+	   
+	   for (roundNum = 0; roundNum < totalRounds; roundNum++) 
+       {  
+         for (matchNumber = 0; matchNumber < numOfMatchesPerRound; matchNumber++){ 
+           out.printf((matchNumber + 1) + "," 
+                          + fixtures[roundNum][matchNumber] + "\n");
+			out.println("");
+		 }
+       }		  
+      		  
+	   out.close();
+       System.out.print("\nYou will have to use the mirror image");
+       System.out.println(" of these fixtures for return fixtures.");
+       if (oddnumOfTeams){
+	       System.out.println("\nSince you had " + (numOfTeams - 1) 
+            + " teams at the outset (uneven number), fixtures "
+	     	+ "against team number " 
+           	+ numOfTeams + " are byes.");
+    }
+  } 
+}
+ 
+public static void createFixtureFile() throws IOException{
+	
+	File file = new File(" " + "fixtures" + ".txt");
+	PrintWriter out = new PrintWriter(file);
+	int increase=1;
+	
+	while(file.exists()){
+     increase++;
+     file = new File(increase + "_" + "fixtures" + ".txt");
+	 
+  } 
+}
+
+//might be able to replace it with Mitch's checkInput()
+public static String getnumOfTeams(String windowMessage, String windowTitle)
+  {
+    boolean validInput = false;    
+    int numberOfnumOfTeams;
+    String input = "", pattern = "[0-9]{1,2}";
+    String errorMessage = "Input invalid.\n\nClick OK to retry."; 
+    while (!validInput)
+    {
+      input = JOptionPane.showInputDialog(null, windowMessage, windowTitle, 3);
+      if (input == null){
+        validInput = true;
+
+      }
+      
+      else if (!input.matches(pattern)) 
+	    JOptionPane.showMessageDialog(null, errorMessage, "Error in user input", 2);
+      
+      else
+      {
+      numberOfnumOfTeams = Integer.parseInt(input);
+      
+	    if (numberOfnumOfTeams < 2)
+	      JOptionPane.showMessageDialog(null, errorMessage, "Error in user input", 2);
+      
+      else 
+		  validInput = true;
+      }
+    }  
+    return input;
+  }	  
+}
