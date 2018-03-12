@@ -310,19 +310,17 @@ public class LeagueManagement
 	public static void ArrayList<String> getAdminLeagues() throws IOException 
 	{
         Scanner in = new Scanner(leagues);
-		int i = 0;
-		Arraylist<String> tableDropDown = new ArrayList<String>();
+	Arraylist<String> tableDropDown = new ArrayList<String>();
         while(in.hasNextLine())
         {   
             String data = in.nextLine();
             if(data.contains(","))
             { 
-                int leagueAdminNum=(data.substring((data.lastIndexOf(",")+1)));
-				if(usernameID ==  Integer.parseInt(leagueAdminNum))
+                int leagueAdminNum = Integer.parseInt(data.substring((data.lastIndexOf(",")+1)));
+				if(usernameID ==  (leagueAdminNum))
 				{
 					String leagueInsert=(data.substring((data.indexOf(",")+1), data.lastIndexOf(","))); 
 					tableDropDown.add(leagueInsert);
-					i++;
 				}
             }
         }   
@@ -398,10 +396,10 @@ public class LeagueManagement
 	**/
 
     //Mitch,sort leagues for respective admin
-    public static void editLeague() throws IOException //identify league
+    public static void editLeague(ArrayList<String> tableDropDown) throws IOException //identify league
     {
         String input = (String) JOptionPane.showInputDialog(null, "Choose a league to manage:",
-        "League Management",JOptionPane.QUESTION_MESSAGE, null, tableChoices,tableChoices[1]); 
+        "League Management",JOptionPane.QUESTION_MESSAGE, null, tableDropDown,tableDropDown[1]); 
         in.close();	
     }
 
@@ -414,12 +412,12 @@ public class LeagueManagement
 	//Mitch,Generation of League Table
 	public static void generateLeagueTable()
     {
-          public static ArrayList<ArrayList<String>>  teams;
-  public static ArrayList<ArrayList<Integer>> fixtures;	
-  public static ArrayList<ArrayList<Integer>> results;
-  public static int [][] leaderBoard;
-  public static void main(String [] args) throws IOException
-  {
+  	 public static ArrayList<ArrayList<String>>  teams;
+ 	 public static ArrayList<ArrayList<Integer>> fixtures;	
+	 public static ArrayList<ArrayList<Integer>> results;
+ 	 public static int [][] leaderBoard;
+ 	 public static void main(String [] args) throws IOException
+   {
 	boolean readFile; 
     readFile = readFilesIntoArrayLists();
     if (!readFile)
