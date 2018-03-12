@@ -426,16 +426,123 @@ public class LeagueManagement
 
         return participants;
     }
-   
-    //Mitch, returns an arraylist of league IDs that match the logged in admin
-    public static ArrayList<Integer> getAdminLeagueIDs() throws IOException 
+    
+//Rian
+    /*
+    deleteAdmin - Deletes the admin which equals the provided admin.
+    Firstly deletes participant and results files from the league which the admin controls
+    secondly deletes the leagues which the admin controls
+    lastly deletes name from admin file
+    */
+    public static void deleteAdmin(String adminToDelete) throws IOException
     {
-        ArrayList<Integer> leagueIDs = new ArrayList<Integer>();
-        Scanner in = new Scanner(leagues);
-        return leagueIDs;
+        if(doesInputExist(admin, adminToDelete, false)) //Check if the admin exists in the admin file
+        {
+            deleteLeagueTeamsAndResults(adminToDelete); //First delete teams and results
+            deleteLeague(adminToDelete); //Second delete the league
+
+            ArrayList<String> adminArray = new ArrayList<String>();
+            Scanner in = new Scanner(admin); //Delete admin
+
+            while(in.hasNext())
+            {
+                String data = in.nextLine();
+                if(!data.toLowerCase().contains(adminToDelete))
+                    adminArray.add(data);
+            }
+            in.close();
+            PrintWriter out = new PrintWriter(admin);
+
+            for(int i = 0; i < adminArray.size(); i++)
+                out.println(adminArray.get(i));
+            out.close();
+        }
+        else
+            JOptionPane.showMessageDialog(null, "Cannot delete this admin as it doesn't exist");
     }
 
+    /*
+    getAdminLeagueIDs - returns an Integer ArrayList containing the leagueIDs which are managed by the 
+    inputted admin. This is done by comparing adminID with the owner ID of the league.
+    */
+    public static ArrayList<Integer> getAdminLeagueIDs(String adminName) throws IOException 
+	{
+		ArrayList<Integer> leagueIDs = new ArrayList<Integer>();
+        Scanner in = new Scanner(leagues);
+        while(in.hasNextLine())
+        {   
+            String data = in.nextLine();
+            if(data.contains(","))
+            { 
+                int leagueOwnerID = Integer.parseInt(data.substring(data.lastIndexOf(',') + 1));
+				if(findAdminIdentifierNumber(adminName) == leagueOwnerID)
+				{
+					int leagueAdminNum=Integer.parseInt(data.substring(0, 1));
+					leagueIDs.add(leagueAdminNum);
+				}
+            }
+        }   
+		in.close();
+		return leagueIDs;
+    }
     
+    /*
+    deleteLeagueTeamsandResults - deltes the teams and results associated with the leagues that the provided
+    admin name owns
+    */
+    public static void deleteLeagueTeamsAndResults(String adminName) throws IOException
+    {
+        String participant = "_participants.txt";
+        String results = "_results.txt";
+
+        ArrayList<Integer> leagueIDNumbers = getAdminLeagueIDs(adminName);
+        for(int i = 0; i < leagueIDNumbers.size(); i++)
+        {
+            String tempParticipant = leagueIDNumbers.get(i) + participant;
+            File participantFile = new File(tempParticipant);
+            if(participantFile.exists())
+            {
+                String tempResults = leagueIDNumbers.get(i) + results;
+                File resultsFile = new File(tempResults);
+                if(resultsFile.exists())
+                {
+                    participantFile.delete();
+                    resultsFile.delete();
+                }
+            }
+        }
+    }
+
+    /*
+    Removes the leagues that the provided admin controls from the leagues.txt file
+    */
+    public static void deleteLeague(String adminName) throws IOException
+    {
+        ArrayList<String> leaguesToKeep = new ArrayList<String>();
+        ArrayList<Integer> deleteLeagueNumbers = getAdminLeagueIDs(adminName);
+        Scanner in = new Scanner(leagues);
+
+        while(in.hasNext()) //Fill String array
+        {
+            String data = in.nextLine();
+            leaguesToKeep.add(data);
+        }
+        in.close();
+
+        for(int i = 0; i < deleteLeagueNumbers.size(); i++) //Remove lines using ArrayList of lines to remove
+        {
+            for(int j = 0; j < leaguesToKeep.size(); j++)
+            {
+                if(leaguesToKeep.get(j).startsWith(deleteLeagueNumbers.get(i).toString()))
+                    leaguesToKeep.remove(j);
+            }
+        }
+        PrintWriter out = new PrintWriter(leagues);
+        for(int i = 0; i < leaguesToKeep.size(); i++)
+            out.println(leaguesToKeep.get(i));
+        out.close();
+    }
+	
     /**
     \\MITCH// FOR LATER
     public static void getAdminLeagues() throws IOException
