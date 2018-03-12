@@ -334,7 +334,7 @@ public class LeagueManagement
 	//Mitch, returns an arraylist of league IDs that match the logged in admin
 	public static ArrayList<Integer> getAdminLeagueIDs() throws IOException 
 	{
-		ArrayList<Integer> leagueIDs = new Arraylist<int>();
+	ArrayList<Integer> leagueIDs = new Arraylist<int>();
         Scanner in = new Scanner(leagues);
         while(in.hasNextLine())
         {   
@@ -414,29 +414,211 @@ public class LeagueManagement
 	//Mitch,Generation of League Table
 	public static void generateLeagueTable()
     {
-        String[][] leagueTable = new String[][]{
-                {"1","leagues.get(i)","x","x","x","x","x"},
-                {"2","leagues.get(i)","x","x","x","x","x"},
-                {"3","leagues.get(i)","x","x","x","x","x"},
-                {"4","leagues.get(i)","x","x","x","x","x"},
-                {"5","leagues.get(i)","x","x","x","x","x"},
-                {"6","leagues.get(i)","x","x","x","x","x"},
-                {"7","leagues.get(i)","x","x","x","x","x"},
-                {"8","leagues.get(i)","x","x","x","x","x"}};
-        String[] columnNames = {"Position","Team","Games","Wins","Draws","Losses","Score"};
-        String[][] data = new String[leagueTable.length][leagueTable[0].length];
-        for (int i = 0; i < data.length; i++)
-        {
-            for (int j = 0; j < data[i].length; j++)
-            {
-                data[i][j] = leagueTable[i][j];
-            }
-        }
-		//--Important table stuff
-        DefaultTableModel model = new DefaultTableModel(data, columnNames);
-        JTable table = new JTable(model);
-        JScrollPane scrollPane = new JScrollPane(table);
-		//--Important table stuff
-        JOptionPane.showMessageDialog(null, scrollPane, "Output",JOptionPane.INFORMATION_MESSAGE);
+          public static ArrayList<ArrayList<String>>  teams;
+  public static ArrayList<ArrayList<Integer>> fixtures;	
+  public static ArrayList<ArrayList<Integer>> results;
+  public static int [][] leaderBoard;
+  public static void main(String [] args) throws IOException
+  {
+	boolean readFile; 
+    readFile = readFilesIntoArrayLists();
+    if (!readFile)
+      System.out.println("One or more files do not exist.");
+    else
+    {
+      createEmptyLeaderBoard();
+      processResults();
+      orderLeaderBoard();
+      displayLeaderboard();
     }
-}
+  }
+  
+  public static boolean readFilesIntoArrayLists() throws IOException
+  {
+    String file1 = "Teams.txt";
+    String file2 = "Fixtures.txt";
+    String file3 = "Results.txt";
+    
+    String filesList[];
+	File inputFile1 = new File(file1);
+	File inputFile2 = new File(file2);
+	File inputFile3 = new File(file3);
+	
+	teams = new ArrayList<ArrayList<String>>();
+	teams.add(new ArrayList<String>());
+    teams.add(new ArrayList<String>());
+  
+    fixtures = new ArrayList<ArrayList<Integer>>();
+	fixtures.add(new ArrayList<Integer>());
+    fixtures.add(new ArrayList<Integer>());
+    fixtures.add(new ArrayList<Integer>());
+    
+    results = new ArrayList<ArrayList<Integer>>();
+	results.add(new ArrayList<Integer>());
+    results.add(new ArrayList<Integer>());
+    results.add(new ArrayList<Integer>());
+    
+	if (inputFile1.exists() && inputFile2.exists() && inputFile3.exists())
+	{
+	  Scanner in;
+	  in = new Scanner(inputFile1);
+	  while(in.hasNext())
+	  {
+	    filesList = (in.nextLine()).split(",");
+	    teams.get(0).add(filesList[0]);  
+	    teams.get(1).add(filesList[1]);  
+	  } 
+	  in.close();
+	  in = new Scanner(inputFile2);
+	  while(in.hasNext())
+	  {
+	    filesList = (in.nextLine()).split(",");
+	    fixtures.get(0).add(Integer.parseInt(filesList[0]));  
+	    fixtures.get(1).add(Integer.parseInt(filesList[1]));  
+	    fixtures.get(2).add(Integer.parseInt(filesList[2]));  
+	  } 
+	  in.close();
+	  in = new Scanner(inputFile3);
+	  while(in.hasNext())
+	  {
+	    filesList = (in.nextLine()).split(",");
+	    results.get(0).add(Integer.parseInt(filesList[0]));  
+	    results.get(1).add(Integer.parseInt(filesList[1]));  
+	    results.get(2).add(Integer.parseInt(filesList[2]));  
+	  } 
+	  in.close();
+	  return true;
+    }
+    else
+      return false;
+  }
+  
+  public static void createEmptyLeaderBoard()
+  {
+	// find out the number of teams/players which will determine 
+	// the number of rows  
+    int rows = teams.get(0).size();
+	int columns = 14;  
+	leaderBoard = new int[rows][columns];
+	// place team numbers in column 0 of leader board
+	for (int i = 0; i < leaderBoard.length; i++)
+      leaderBoard[i][0] = Integer.parseInt(teams.get(0).get(i));
+  }	  
+  
+  public static void processResults()
+  {
+	int fixtureNumber, homeTeamScore, awayTeamScore, homeTeamNumber, awayTeamNumber;
+	int position;
+	for (int i = 0; i < results.get(0).size(); i++)  
+    {
+	  fixtureNumber  = results.get(0).get(i);
+	  homeTeamScore  = results.get(1).get(i);
+	  awayTeamScore  = results.get(2).get(i);
+	  position       = fixtures.get(0).indexOf(fixtureNumber);
+	  homeTeamNumber = fixtures.get(1).get(position);
+	  awayTeamNumber = fixtures.get(2).get(position);
+	  if (homeTeamScore == awayTeamScore)
+	  {
+		recordFixtureResultForHomeTeam(homeTeamNumber,0,1,0,homeTeamScore,awayTeamScore,1);
+		recordFixtureResultForAwayTeam(awayTeamNumber,0,1,0,homeTeamScore,awayTeamScore,1);
+	  }  
+	  else if (homeTeamScore > awayTeamScore)
+	  {
+		recordFixtureResultForHomeTeam(homeTeamNumber,1,0,0,homeTeamScore,awayTeamScore,3);
+		recordFixtureResultForAwayTeam(awayTeamNumber,0,0,1,homeTeamScore,awayTeamScore,0);  
+	  }  
+	  else
+	  {
+		recordFixtureResultForHomeTeam(homeTeamNumber,0,0,1,homeTeamScore,awayTeamScore,0);
+		recordFixtureResultForAwayTeam(awayTeamNumber,1,0,0,homeTeamScore,awayTeamScore,3);  
+	  }    
+    }
+  }	 
+  
+  public static void recordFixtureResultForHomeTeam(int hTN, int w, int d, int l, 
+                                                       int hTS, int aTS, int p)
+  {
+	leaderBoard[hTN-1][1]++;        			// gamesPlayed
+	leaderBoard[hTN-1][2]+= w;      			// homeWin
+	leaderBoard[hTN-1][3]+= d;      			// homeDraw
+	leaderBoard[hTN-1][4]+= l;      			// homeLoss
+	leaderBoard[hTN-1][5]+= hTS;    			// homeTeamScore
+	leaderBoard[hTN-1][6]+= aTS;    			// awayTeamScore
+	leaderBoard[hTN-1][12] += (hTS - aTS);    	// goalDifference
+	leaderBoard[hTN-1][13] += p;    			// points
+  }
+ 
+  public static void recordFixtureResultForAwayTeam(int aTN, int w, int d, int l, 
+                                                       int hTS, int aTS, int p)
+  {
+	leaderBoard[aTN-1][1]++;        			// gamesPlayed
+	leaderBoard[aTN-1][7]+= w;      			// awayWin
+	leaderBoard[aTN-1][8]+= d;      			// awayDraw
+	leaderBoard[aTN-1][9]+= l;      			// awayLoss
+	leaderBoard[aTN-1][10]+= aTS;    			// awayTeamScore
+	leaderBoard[aTN-1][11]+= hTS;    			// homeTeamScore
+	leaderBoard[aTN-1][12] += (aTS - hTS);    	// goalDifference
+	leaderBoard[aTN-1][13] += p;    			// points  
+  }	
+  
+  public static void orderLeaderBoard()
+  {
+	int [][] temp = new int[leaderBoard.length][leaderBoard[0].length];
+    boolean finished = false;
+    while (!finished) 
+    {
+      finished = true;
+      for (int i = 0; i < leaderBoard.length - 1; i++) 
+      {
+        if (leaderBoard[i][13] < leaderBoard[i + 1][13])
+        {
+          for (int j = 0; j < leaderBoard[i].length; j++) 
+          {
+            temp[i][j]            = leaderBoard[i][j];
+            leaderBoard[i][j]     = leaderBoard[i + 1][j];
+            leaderBoard[i + 1][j] = temp[i][j];
+          }
+          finished = false;
+        }
+      }
+    }
+  }	  
+	  
+  public static void displayLeaderboard()
+  {
+	int aTeamNumber;
+	String aTeamName, formatStringTeamName;
+	String longestTeamName       = teams.get(1).get(0);
+    int    longestTeamNameLength = longestTeamName.length();
+    
+    for (int i = 1; i < teams.get(1).size(); i++)
+    {
+	  longestTeamName = teams.get(1).get(i);  
+      if (longestTeamNameLength < longestTeamName.length())
+        longestTeamNameLength = longestTeamName.length();
+    }
+    formatStringTeamName = "%-" + (longestTeamNameLength + 2) + "s";
+    System.out.printf(formatStringTeamName,"Team Name");
+    System.out.println("  GP  HW  HD  HL  GF  GA  AW  AD  AL  GF  GA   GD   TP"); 
+   
+    for (int i = 0; i < leaderBoard.length; i++)
+    {
+	  aTeamNumber       = leaderBoard[i][0];
+	  aTeamName         = teams.get(1).get(aTeamNumber - 1);       
+      System.out.printf(formatStringTeamName, aTeamName);
+      System.out.printf("%4d", leaderBoard[i][1]);
+      System.out.printf("%4d", leaderBoard[i][2]);
+      System.out.printf("%4d", leaderBoard[i][3]);
+      System.out.printf("%4d", leaderBoard[i][4]);
+      System.out.printf("%4d", leaderBoard[i][5]);
+      System.out.printf("%4d", leaderBoard[i][6]);
+      System.out.printf("%4d", leaderBoard[i][7]);
+	  System.out.printf("%4d", leaderBoard[i][8]);
+      System.out.printf("%4d", leaderBoard[i][9]);
+      System.out.printf("%4d", leaderBoard[i][10]);
+      System.out.printf("%4d", leaderBoard[i][11]);
+      System.out.printf("%5d", leaderBoard[i][12]);
+      System.out.printf("%5d", leaderBoard[i][13]);
+      System.out.println();
+    }
+  } 
