@@ -35,34 +35,54 @@ public class LeagueManagement
             if(!loggedIn)
             {
                 choice = JOptionPane.showOptionDialog(null, loggedInUser + "What would you like to do?", "League Manager",JOptionPane.YES_NO_OPTION, 
-                    1, null, options, options[0]);
+                                                    1, null, options, options[0]);
 
                 if(choice == 0)
                 {
                     loggedIn = logInSequence(admin, username);
                     if(loggedIn)
                         loggedInUser = "Logged in: " + username + "\n\n";
-                    usernameID = findAdminIdentifierNumber(username.toString());
+                        usernameID = findAdminIdentifierNumber(username.toString());
                 }
                 else if(choice == 1)
                 {
-                    createAdmin();
+                        createAdmin();
                 }
             }
-            //losg
+			//losg
             else
                 choice2 = JOptionPane.showOptionDialog(null, loggedInUser + "Select a Menu:", "League Manager",JOptionPane.YES_NO_OPTION, 
-                    1, null, tableOptions, options[0]);
+                                                    1, null, tableOptions, options[0]);
+                
+                if(choice2 == 0) //Create new league
+                {
 
-            if (choice2 == 2){
+                }
+                else if(choice2 == 1) //Manage existing league
+                {
 
-                username = new StringBuilder("");
-                loggedIn = false;
-                loggedInUser = "Not logged in:\n\n";
-                choice2 = 0;
-
-            }
-        }while(choice != 2 && choice2 !=3);
+                }
+                else if(choice2 == 2) //Delete Admin
+                {
+                    if(JOptionPane.showConfirmDialog(null, "Are you sure?", "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+                    {
+                        deleteAdmin(username.toString());
+                        username = new StringBuilder("");
+					    loggedIn = false;
+					    loggedInUser = "Not logged in:\n\n";
+					    choice2 = 0;
+                    }
+                }
+                else if (choice2 == 3) //Log out
+                {
+					
+					username = new StringBuilder("");
+					loggedIn = false;
+					loggedInUser = "Not logged in:\n\n";
+					choice2 = 0;	
+				}
+				
+        }while(choice != 2 && choice2 !=4);
     }
 
     public static boolean logInSequence(File adminFile, StringBuilder user) throws IOException
