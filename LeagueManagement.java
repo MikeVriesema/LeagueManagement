@@ -569,16 +569,8 @@ public static void generateFixtures() throws IOException
                           + fixtures[roundNum][matchNumber] + "\n");
 			out.println("");
 		 }
-       }		  
-      		  
-	   out.close();
-       System.out.print("\nYou will have to use the mirror image");
-       System.out.println(" of these fixtures for return fixtures.");
-       if (oddnumOfTeams){
-	       System.out.println("\nSince you had " + (numOfTeams - 1) 
-            + " teams at the outset (uneven number), fixtures "
-	     	+ "against team number " 
-           	+ numOfTeams + " are byes.");
+       }		  	  
+	 out.close();
     }
   } 
 }
