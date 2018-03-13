@@ -954,4 +954,83 @@ public static String getnumOfTeams(String windowMessage, String windowTitle)
             System.out.println();
         }
     }
+//Love From Ryan
+	public static int findLeagueIdentifierNumber () throws IOException
+    {	
+	int identifierNo;
+		FileReader aFileReader = new FileReader("leagues.txt");
+		Scanner in = new Scanner ( aFileReader );
+		String aLineFromFile = "";
+		
+		while ( in.hasNext())
+		{
+			aLineFromFile = in.nextLine();
+		}
+		
+		in.close();
+		aFileReader.close();
+		
+		if(aLineFromFile.isEmpty())
+		{
+			 identifierNo = 0;
+		}
+		else
+		{
+			String aLineFromFileSplit []  = aLineFromFile.split(",") ; 
+			String identifier = aLineFromFileSplit[0];
+			 identifierNo = Integer.parseInt(identifier);
+		}
+		return identifierNo;
+    }
+	
+	
+ //Love From Ryan
+	public static void CreateLeague () throws IOException
+	{
+		int leagueNo = findLeagueIdentifierNumber();
+		leagueNo = leagueNo + 1;
+		
+		boolean leagueCreated = false;
+		
+		FileWriter aFileWriter = new FileWriter("leagues.txt", true); 
+		PrintWriter out = new PrintWriter(aFileWriter);
+			
+		while(leagueCreated == false)
+        {
+			String leagueName = JOptionPane.showInputDialog(null,"Please enter the league name you wish to use:","League Name",1);
+			if (leagueName != null)
+				{
+					leagueName = leagueName.trim();
+				
+					if(stringCheck(leagueName))
+					{
+						if(doesInputExist(leagues, leagueName, false))
+						{
+							out.println( leagueNo + "," + leagueName + "," + usernameID);
+							out.close();
+							aFileWriter.close();
+							leagueCreated = true ; 
+							break;
+						}
+						else
+						{ 
+							JOptionPane.showMessageDialog(null,"The League Name you picked already exists!","League Name Error", 1);
+							leagueCreated = false;
+							
+						}
+					}
+					else
+					{ 
+						JOptionPane.showMessageDialog(null,"Enter a name between 1 to 20 and only alphabetical","League Name Error", 1);
+						leagueCreated = false;
+					}
+				}
+			else
+			{
+				JOptionPane.showMessageDialog(null,"League Name cannot be empty","League Name Error", 1);
+				leagueCreated = false;
+			}
+		}
+	}
+
 }
