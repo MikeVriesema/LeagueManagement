@@ -35,21 +35,21 @@ public class LeagueManagement
             if(!loggedIn)
             {
                 choice = JOptionPane.showOptionDialog(null, loggedInUser + "What would you like to do?", "League Manager",JOptionPane.YES_NO_OPTION, 
-                    1, null, options, options[0]);
+                                                    1, null, options, options[0]);
 
                 if(choice == 0)
                 {
                     loggedIn = logInSequence(admin, username);
                     if(loggedIn)
                         loggedInUser = "Logged in: " + username + "\n\n";
-                    usernameID = findAdminIdentifierNumber(username.toString());
+                        usernameID = findAdminIdentifierNumber(username.toString());
                 }
                 else if(choice == 1)
                 {
-                    createAdmin();
+                        createAdmin();
                 }
             }
-            //losg
+			//losg
             else
             {
                 choice2 = JOptionPane.showOptionDialog(null, loggedInUser + "Select a Menu:", "League Manager",JOptionPane.YES_NO_OPTION, 
@@ -62,6 +62,7 @@ public class LeagueManagement
                 else if(choice2 == 1) //Manage existing league
                 {
                     editLeague();
+
                 }
                 else if(choice2 == 2) //Delete Admin
                 {
@@ -72,6 +73,7 @@ public class LeagueManagement
                         loggedIn = false;
                         loggedInUser = "Not logged in:\n\n";
                         choice2 = 0;
+
                     }
                 }
                 else if (choice2 == 3) //Log out
@@ -82,7 +84,6 @@ public class LeagueManagement
                     choice2 = 0;    
                 }
             }
-
         }while(choice != 2 && choice2 !=4);
     }
 
@@ -421,6 +422,7 @@ public class LeagueManagement
     }
 
     //Rian
+
     /*
     deleteAdmin - Deletes the admin which equals the provided admin.
     Firstly deletes participant and results files from the league which the admin controls
@@ -484,6 +486,7 @@ public class LeagueManagement
     admin name owns
      */
     public static void deleteLeagueTeamsAndResults(String adminName) throws IOException
+
     {
         String participant = "_participants.txt";
         String results = "_results.txt";
@@ -652,6 +655,7 @@ public class LeagueManagement
         } 
     }
 
+
     //losg - might be able to replace it with Mitch's checkInput
     public static String getnumOfTeams(String windowMessage, String windowTitle)
     {
@@ -683,6 +687,7 @@ public class LeagueManagement
         }  
         return input;
     }     
+
 
     //Mitch,Generation of League Table
     public static void generateLeagueTable() throws IOException
@@ -889,6 +894,7 @@ public class LeagueManagement
             System.out.println();
         }
     }
+
     //Love From Ryan
     public static int findLeagueIdentifierNumber () throws IOException
     {   
