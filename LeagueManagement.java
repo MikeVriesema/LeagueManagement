@@ -46,7 +46,7 @@ public class LeagueManagement
                 }
                 else if(choice == 1)
                 {
-                    createAdmin();
+                    createAdmin();//Sort out the name input @RIAN @RYAN
                 }
             }
             //losg
