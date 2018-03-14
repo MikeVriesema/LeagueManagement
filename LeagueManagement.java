@@ -58,10 +58,13 @@ public class LeagueManagement
                 if(choice2 == 0) //Create new league
                 {
                     createLeague();
+                    generateFixtures();
+                  
                 }
                 else if(choice2 == 1) //Manage existing league
                 {
                     editLeague();
+                   
                 }
                 else if(choice2 == 2) //Delete Admin
                 {
@@ -563,8 +566,9 @@ public class LeagueManagement
         int numOfTeams, totalRounds, numOfMatchesPerRound;
         int roundNum, matchNumber, homeTeamNum, awayTeamNum, even, odd;
         boolean oddnumOfTeams = false;
-        PrintWriter out = new PrintWriter("fixtures.txt");
-        createFixtureFile();
+        File file = createFixtureFile();
+        
+        PrintWriter out = new PrintWriter(file);
         String selection;
         String [][] fixtures;
         String [][] revisedFixtures;
@@ -624,11 +628,11 @@ public class LeagueManagement
                     fixtures[roundNum][0] = elements[1] + "," + elements[0];
                 }
             } 
-
+           int  lastLeagueNum =  findLeagueIdentifierNumber ();
             for (roundNum = 0; roundNum < totalRounds; roundNum++) 
             {  
                 for (matchNumber = 0; matchNumber < numOfMatchesPerRound; matchNumber++){ 
-                    out.printf((matchNumber + 1) + "," 
+                    out.printf( lastLeagueNum + "," 
                         + fixtures[roundNum][matchNumber] + "\n");
                     out.println("");
                 }
@@ -638,19 +642,15 @@ public class LeagueManagement
     }
 
     //losg
-    public static void createFixtureFile() throws IOException
+    public static File createFixtureFile() throws IOException
     {
 
-        File file = new File(" " + "fixtures" + ".txt");
-        PrintWriter out = new PrintWriter(file);
-        int increase=1;
+        int adminNum = findAdminIdentifierNumber(username.toString());
+        File file = new File(adminNum + "_" + "fixtures" + ".txt");
 
-        while(file.exists())
-        {
-            increase++;
-            file = new File(increase + "_" + "fixtures" + ".txt");
-
-        } 
+    
+        return file;
+        
     }
 
     //losg - might be able to replace it with Mitch's checkInput
