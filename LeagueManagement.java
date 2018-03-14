@@ -932,7 +932,7 @@ public class LeagueManagement
             leagueName = leagueName.trim();
             if(stringCheck(leagueName))
             {
-                if(doesInputExist(leagues, leagueName, false))
+                if(!(doesInputExist(leagues, leagueName, false)))
                 {
                     out.println( leagueNo + "," + leagueName + "," + usernameID);
                     out.close();
