@@ -47,6 +47,7 @@ public class LeagueManagement
                 else if(choice == 1)
                 {
                     createAdmin();//Sort out the name input @RIAN @RYAN
+                    createFixtureFile();
                 }
             }
             //losg
@@ -560,15 +561,17 @@ public class LeagueManagement
     }
 
     //losg
+    //losg
     public static void generateFixtures() throws IOException
     {
 
         int numOfTeams, totalRounds, numOfMatchesPerRound;
         int roundNum, matchNumber, homeTeamNum, awayTeamNum, even, odd;
+        int adminNum = findAdminIdentifierNumber(username.toString());
         boolean oddnumOfTeams = false;
-        File file = createFixtureFile();
-        
-        PrintWriter out = new PrintWriter(file);
+        File file = new File(adminNum + "_fixtures.txt");   
+        FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+        PrintWriter out = new PrintWriter(fw);
         String selection;
         String [][] fixtures;
         String [][] revisedFixtures;
@@ -603,7 +606,7 @@ public class LeagueManagement
                     awayTeamNum = (numOfTeams - 1 - matchNumber + roundNum) % (numOfTeams - 1);
                     if (matchNumber == 0) 
                         awayTeamNum = numOfTeams - 1;
-                    fixtures[roundNum][matchNumber]  = (homeTeamNum + 1) + "," + (awayTeamNum + 1) + "\n";
+                    fixtures[roundNum][matchNumber]  = (homeTeamNum + 1) + "," + (awayTeamNum + 1);
                 }   
             } 
 
@@ -628,15 +631,16 @@ public class LeagueManagement
                     fixtures[roundNum][0] = elements[1] + "," + elements[0];
                 }
             } 
-           int  lastLeagueNum =  findLeagueIdentifierNumber ();
+            
+            int  lastLeagueNum =  findLeagueIdentifierNumber ();
+
             for (roundNum = 0; roundNum < totalRounds; roundNum++) 
             {  
                 for (matchNumber = 0; matchNumber < numOfMatchesPerRound; matchNumber++){ 
-                    out.printf( lastLeagueNum + "," 
-                        + fixtures[roundNum][matchNumber] + "\n");
-                    out.println("");
+                    out.println( lastLeagueNum + "," 
+                        + fixtures[roundNum][matchNumber]);
                 }
-            }             
+            }        
             out.close();
         }
     }
@@ -644,13 +648,10 @@ public class LeagueManagement
     //losg
     public static File createFixtureFile() throws IOException
     {
-
         int adminNum = findAdminIdentifierNumber(username.toString());
         File file = new File(adminNum + "_" + "fixtures" + ".txt");
-
-    
+   
         return file;
-        
     }
 
     //losg - might be able to replace it with Mitch's checkInput
