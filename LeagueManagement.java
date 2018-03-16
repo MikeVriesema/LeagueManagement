@@ -651,12 +651,14 @@ public class LeagueManagement
     //losg
     public static File createFixtureFile() throws IOException
     {
-        int adminNum = findAdminIdentifierNumber(username.toString());
-        File file = new File(adminNum + "_" + "fixtures" + ".txt");
-   
-        return file;
-    }
 
+        int leagueNum = findLeagueIdentifierNumber();
+        File file = new File(leagueNum + "_" + "fixtures" + ".txt");
+
+    
+        return file;
+        
+    }
     //losg - might be able to replace it with Mitch's checkInput
     public static String getnumOfTeams(String windowMessage, String windowTitle)
     {
