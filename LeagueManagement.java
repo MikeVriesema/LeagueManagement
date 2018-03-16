@@ -5,16 +5,16 @@ import javax.swing.*;
 import java.io.*;
 import java.util.*;
 
-public class LeagueManagement
+public class LeagueManagement5
 {
     static StringBuilder username;
     static int usernameID;
     static File admin;
     static File leagues;
-    static ArrayList<ArrayList<String>>  teams;
-    static ArrayList<ArrayList<Integer>> fixtures;   
-    static ArrayList<ArrayList<Integer>> results;
-    static int [][] leaderBoard;
+    public static ArrayList<ArrayList<String>>  teams;
+    public static ArrayList<ArrayList<Integer>> fixtures;   
+    public static ArrayList<ArrayList<Integer>> results;
+    public static int [][] leaderBoard;
 
     public static void main(String[] args) throws IOException
     {
@@ -23,13 +23,10 @@ public class LeagueManagement
         leagues = new File("leagues.txt");
         String options[] = {"Log in", "Create New Admin", "Quit"};
         String tableOptions[] = {"Create League", "Manage Existing League", "Delete Account", "Log Out"};
-
         String leagueManageOptions[] = {"View Leaderboard", "Edit Results", "Delete this League","Return to menu"};
-
         int choice = -1;
         int choice2 = -1;
         int choice3 = -1;
-
         String loggedInUser = "You are currently not logged in:\n\n";
         username = new StringBuilder("");
 
@@ -125,7 +122,7 @@ public class LeagueManagement
         String inputName = "";
         String inputPassword = "";
 
-        inputName = JOptionPane.showInputDialog(null, "Please enter admin name");
+        inputName = JOptionPane.showInputDialog(null, "Please enter admin name"); //if password is entered for username the program shits itself
         if(inputName != null)
         {
             if(doesInputExist(admin, inputName, false))
@@ -136,7 +133,7 @@ public class LeagueManagement
                 temp = stringAtLineNumber(admin, index).split(",");
                 while(attempts < 3)
                 {
-                    inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]);
+                    inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]); 
                     if(inputPassword != null)
                     {
                         if(passwordCheck(inputPassword) && inputPassword.equals(temp[2]))
@@ -170,6 +167,9 @@ public class LeagueManagement
 
         return loggedIn;
     }
+
+
+
     //Rian
     public static void checkSetup() throws IOException
     {
@@ -206,7 +206,9 @@ public class LeagueManagement
                 if(caseSensitive)
                 {
                     String aLineFromFile = in.nextLine();
-                    if(aLineFromFile.contains(input))
+                    String aLineFromFileArray []  = aLineFromFile.split(",");
+
+                    if(aLineFromFileArray[1].contains(input))
                     {
                         in.close();
                         return true;
@@ -215,7 +217,8 @@ public class LeagueManagement
                 else
                 {
                     String aLineFromFile = in.nextLine().toLowerCase();
-                    if(aLineFromFile.contains(input.toLowerCase()))
+                    String aLineFromFileArray []  = aLineFromFile.split(",");
+                    if(aLineFromFileArray[1].contains(input.toLowerCase()))
                     {
                         in.close();
                         return true;
@@ -581,57 +584,17 @@ public class LeagueManagement
             String choiceX = "-1";
             return choiceX;
         }
-        else
+          else
         {
             String[] choices = new String[tableDropDown.size()];
             choices = tableDropDown.toArray(choices);
             String input =(String)(JOptionPane.showInputDialog(null, "Choose a league:",
-                        "League Management",JOptionPane.QUESTION_MESSAGE, null, choices,choices[0]));
+            "League Management",JOptionPane.QUESTION_MESSAGE, null, choices,choices[0]));
             return input;       
             //delete league option and edit league option
         }
     }
 
-    //ryan 
-    /**
-    public static void deleteSelectedLeague(String leagueDeleteName) throws IOException
-    {
-        PrintWriter out = new PrintWriter(leagues);
-        //ArrayList<String> leagueKeep = getAdminLeagues(); //fills arraylist with leagues belonging to logged in admin
-        //leagueKeep.remove(leagueDeleteName);
-        ArrayList<Integer> LeaguesDelete = getAdminLeagueIDs(username.toString());
-
-        String leaguesList[];
-        leaguesArray = new ArrayList<ArrayList<String>>();
-        leaguesArray.add(new ArrayList<String>());
-        leaguesArray.add(new ArrayList<String>());
-        Scanner in;
-        in = new Scanner(leagues);
-        while(in.hasNext())
-        {
-            leaguesList = (in.nextLine()).split(",");
-            leaguesArray.get(0).add(Integer.parseInt(leaguesList[0]));  
-            leaguesArray.get(1).add(leagueList[1]);
-            leaguesArray.get(2).add(Integer.parseInt(leaguesList[2]));   
-        } 
-        leaguesArray.get(1).remove(leagueDeleteName);
-        in.close();
-        int i =0;
-        while(in.hasNext()) 
-        {
-            String data = in.nextLine();
-            int leagueAdminNum = Integer.parseInt(data.substring((data.lastIndexOf(",")+1)));
-            if(usernameID ==  leagueAdminNum)
-            {
-                out.print(" jeff");
-            }
-        }
-        in.close();
-        out.close();
-    }
-    **/
-
-    //losg
     //losg
     public static void generateFixtures() throws IOException
     {
@@ -648,8 +611,8 @@ public class LeagueManagement
         String [][] revisedFixtures;
         String []   elements;
         String fixtureAsText;
-        selection = getnumOfTeams("Number of Teams", 
-            "Please enter a number in the range 2 to 99 for the number of teams");
+        selection = getnumOfTeams("Team Number Entry", 
+            "Please enter a number in the range 2 to 99");
 
         //***FILE STRUCTURE: FixtureNumber,HomeParticipant#,AwayParticipant#8*** 
         //checks selection
