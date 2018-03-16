@@ -1,0 +1,51 @@
+
+	//this is wrong pls dont use it, i have to fix it, its a referencee for mitch
+	public static void deleteLeague(int leagueNumber) throws IOException
+    {
+        ArrayList<String> leaguesToKeep = new ArrayList<String>();
+        ArrayList<Integer> LeaguesPossibleToDelete = getAdminLeagueIDs(adminName);
+        Scanner in = new Scanner(leagues);
+
+        while(in.hasNext()) //Fill String array with all 
+        {
+			
+            String data = in.nextLine();
+			String dataArray [] = dataArray.split(",");
+			
+			if(leaugeNumber != dataArray[0])
+			{
+				leaguesToKeep.add(data);
+			}
+			else 
+			{
+				
+				
+        }
+        in.close();
+
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+        for(int i = 0; i < deleteLeagueNumbers.size(); i++) //Remove lines using ArrayList of lines to remove
+        {
+            for(int j = 0; j < leaguesToKeep.size(); j++)
+            {
+                if(leaguesToKeep.get(j).startsWith(deleteLeagueNumbers.get(i).toString()))
+                    leaguesToKeep.remove(j);
+            }
+        }
+        PrintWriter out = new PrintWriter(leagues);
+        for(int i = 0; i < leaguesToKeep.size(); i++)
+            out.println(leaguesToKeep.get(i));
+        out.close();
+    }
+	
