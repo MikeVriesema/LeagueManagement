@@ -177,7 +177,9 @@ public class LeagueManagement
                 if(caseSensitive)
                 {
                     String aLineFromFile = in.nextLine();
-                    if(aLineFromFile.contains(input))
+                    String aLineFromFileArray []  = aLineFromFile.split(",");
+
+                    if(aLineFromFileArray[1].contains(input))
                     {
                         in.close();
                         return true;
@@ -186,7 +188,8 @@ public class LeagueManagement
                 else
                 {
                     String aLineFromFile = in.nextLine().toLowerCase();
-                    if(aLineFromFile.contains(input.toLowerCase()))
+                    String aLineFromFileArray []  = aLineFromFile.split(",");
+                    if(aLineFromFileArray[1].contains(input.toLowerCase()))
                     {
                         in.close();
                         return true;
