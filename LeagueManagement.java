@@ -5,7 +5,7 @@ import javax.swing.*;
 import java.io.*;
 import java.util.*;
 
-public class LeagueManagement
+public class LeagueManagement5
 {
     static StringBuilder username;
     static int usernameID;
@@ -23,8 +23,10 @@ public class LeagueManagement
         leagues = new File("leagues.txt");
         String options[] = {"Log in", "Create New Admin", "Quit"};
         String tableOptions[] = {"Create League", "Manage Existing League", "Delete Account", "Log Out"};
+        String leagueManageOptions[] = {"View Leaderboard", "Edit Results", "Delete this League","Return to menu"};
         int choice = -1;
         int choice2 = -1;
+        int choice3 = -1;
         String loggedInUser = "You are currently not logged in:\n\n";
         username = new StringBuilder("");
 
@@ -46,8 +48,9 @@ public class LeagueManagement
                 }
                 else if(choice == 1)
                 {
-                    createAdmin();//Sort out the name input @RIAN @RYAN
-                    createFixtureFile();
+
+                    createAdmin();
+                    createFixtureFile(); //why create it here if each file is dependent on the league number??
                 }
             }
             //losg
@@ -64,8 +67,32 @@ public class LeagueManagement
                 }
                 else if(choice2 == 1) //Manage existing league
                 {
-                    editLeague();
-                   
+                    String selectedLeague = editLeague();
+                    if(selectedLeague.length()<3)
+                    {
+                        choice2 = Integer.parseInt(selectedLeague);
+                    }
+                    else
+                    {
+                    choice3 = JOptionPane.showOptionDialog(null, loggedInUser + "Select a league option:","League Manager for:"+ selectedLeague,JOptionPane.YES_NO_OPTION, 
+                    1, null, leagueManageOptions, leagueManageOptions[0]);
+                    }
+                        if(choice3 == 0)
+                        {
+                            generateLeagueTable();
+                        }
+                        else if(choice3 == 1)
+                        {
+                            //edit results
+                        }
+                        else if(choice3 == 2)
+                        {
+                            //deleteSelectedLeague(selectedLeague);
+                        }
+                        else if(choice3 == 3)
+                        {
+                            choice2 = 1;
+                        }
                 }
                 else if(choice2 == 2) //Delete Admin
                 {
@@ -96,7 +123,7 @@ public class LeagueManagement
         String inputName = "";
         String inputPassword = "";
 
-        inputName = JOptionPane.showInputDialog(null, "Please enter admin name");
+        inputName = JOptionPane.showInputDialog(null, "Please enter admin name"); //if password is entered for username the program shits itself
         if(inputName != null)
         {
             if(doesInputExist(admin, inputName, false))
@@ -107,7 +134,7 @@ public class LeagueManagement
                 temp = stringAtLineNumber(admin, index).split(",");
                 while(attempts < 3)
                 {
-                    inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]);
+                    inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]); 
                     if(inputPassword != null)
                     {
                         if(passwordCheck(inputPassword) && inputPassword.equals(temp[2]))
@@ -141,6 +168,9 @@ public class LeagueManagement
 
         return loggedIn;
     }
+
+
+
     //Rian
     public static void checkSetup() throws IOException
     {
@@ -545,20 +575,23 @@ public class LeagueManagement
 
 
     //Mitch,sort leagues for respective admin
-    public static void editLeague() throws IOException //identify league
+    public static String editLeague() throws IOException //identify league
     {   
         ArrayList<String> tableDropDown = getAdminLeagues();
         if(tableDropDown.size()==0)
         {
             JOptionPane.showMessageDialog(null,"No leagues associated with this account!\nPlease create a league!"
             ,"Manage Leagues",1);
+            String choiceX = "-1";
+            return choiceX;
         }
-        else
+          else
         {
             String[] choices = new String[tableDropDown.size()];
             choices = tableDropDown.toArray(choices);
             String input =(String)(JOptionPane.showInputDialog(null, "Choose a league:",
-                        "League Management",JOptionPane.QUESTION_MESSAGE, null, choices,choices[0])); 
+            "League Management",JOptionPane.QUESTION_MESSAGE, null, choices,choices[0]));
+            return input;       
             //delete league option and edit league option
         }
     }
@@ -651,13 +684,10 @@ public class LeagueManagement
     //losg
     public static File createFixtureFile() throws IOException
     {
-
         int leagueNum = findLeagueIdentifierNumber();
         File file = new File(leagueNum + "_" + "fixtures" + ".txt");
-
-    
+      
         return file;
-        
     }
     //losg - might be able to replace it with Mitch's checkInput
     public static String getnumOfTeams(String windowMessage, String windowTitle)
