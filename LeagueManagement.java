@@ -472,7 +472,66 @@ public class LeagueManagement
         for(int i = 0; i < participants.size(); i++)
             out.println((i + 1) + "," + participants.get(i));
         out.close();
+    }	
+	
+	
+	//Losg Creates results
+	public static void createResults(int maxTeamNum) throws IOException
+    {   
+
+        ArrayList<String> results = new ArrayList<String>();
+        ArrayList<String> fixture = new ArrayList<String>();
+        int leagueNumber = findLeagueIdentifierNumber();
+        FileReader partFile = new FileReader(leagueNumber + "_participants.txt");
+        FileReader fixFile = new FileReader(leagueNumber + "_fixtures.txt");
+
+        String input = "";
+        int teamCount = 0;
+       
+        Scanner in = new Scanner(partFile);
+        Scanner inFix = new Scanner(fixFile);
+        while(inFix.hasNextLine())
+        {   
+            String data = in.nextLine();
+            String dataArrayPart[] = data.split(",");
+            String dataFix = inFix.nextLine();
+            String dataArrayFix[] = dataFix.split(",");
+
+            
+                input = JOptionPane.showInputDialog(null, "Input score for home team in match: " + dataArrayFix[1] + "v" + dataArrayFix[2]);
+                    
+                if(input != null){
+                    if(integerCheck(Integer.parseInt(input)))
+                    {
+                    results.add(input);
+                    }
+                }
+
+                else{
+                    JOptionPane.showMessageDialog(null, "Incorrect format of result");
+                }
+                
+                input = JOptionPane.showInputDialog(null, "Input score for away team in match: " +  dataArrayFix[1] + "v" + dataArrayFix[2]);
+                    
+                if(input != null){
+                    if(integerCheck(Integer.parseInt(input)))
+                    {
+                    results.add(input);
+                    }
+                }
+                else{
+                    JOptionPane.showMessageDialog(null, "Incorrect format of participant");
+                }
+
+        }
+
+        File resultFile = new File(leagueNumber + "_results.txt");
+        PrintWriter out = new PrintWriter(resultFile);
+        for(int i = 0; i < results.size(); i++) 
+            out.println(leagueNumber + "," + results.get(i));
+        out.close();        
     }
+
 
     //Rian
     /*
@@ -617,7 +676,6 @@ public class LeagueManagement
 
     //losg
     public static int generateFixtures() throws IOException
-
     {
 
         int numOfTeams = 0, totalRounds, numOfMatchesPerRound;
@@ -704,10 +762,14 @@ public class LeagueManagement
     //losg
     public static File createFixtureFile() throws IOException
     {
-        int adminNum = findAdminIdentifierNumber(username.toString());
-        File file = new File(adminNum + "_" + "fixtures" + ".txt")
+
+        int leagueNum = findLeagueIdentifierNumber();
+        File file = new File(leagueNum + "_" + "fixtures" + ".txt");
+
+    
         return file;
-    }
+        
+    }	
     //losg - might be able to replace it with Mitch's checkInput
     public static String getnumOfTeams(String windowMessage, String windowTitle)
     {
