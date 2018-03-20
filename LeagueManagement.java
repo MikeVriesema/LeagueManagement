@@ -50,6 +50,7 @@ public class LeagueManagement
                 }
                 else if(choice == 1)
                 {
+
                     createAdmin();
                     createFixtureFile(); 
 
@@ -616,6 +617,7 @@ public class LeagueManagement
 
     //losg
     public static int generateFixtures() throws IOException
+
     {
 
         int numOfTeams = 0, totalRounds, numOfMatchesPerRound;
@@ -703,11 +705,9 @@ public class LeagueManagement
     public static File createFixtureFile() throws IOException
     {
         int adminNum = findAdminIdentifierNumber(username.toString());
-        File file = new File(adminNum + "_" + "fixtures" + ".txt");
-        
+        File file = new File(adminNum + "_" + "fixtures" + ".txt")
         return file;
     }
-
     //losg - might be able to replace it with Mitch's checkInput
     public static String getnumOfTeams(String windowMessage, String windowTitle)
     {
