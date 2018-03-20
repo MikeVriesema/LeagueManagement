@@ -5,7 +5,8 @@ import javax.swing.*;
 import java.io.*;
 import java.util.*;
 
-public class LeagueManagement5
+public class LeagueManagement
+
 {
     static StringBuilder username;
     static int usernameID;
@@ -23,6 +24,7 @@ public class LeagueManagement5
         leagues = new File("leagues.txt");
         String options[] = {"Log in", "Create New Admin", "Quit"};
         String tableOptions[] = {"Create League", "Manage Existing League", "Delete Account", "Log Out"};
+
         String leagueManageOptions[] = {"View Leaderboard", "Edit Results", "Delete this League","Return to menu"};
         int choice = -1;
         int choice2 = -1;
@@ -50,6 +52,7 @@ public class LeagueManagement5
                 {
                     createAdmin();
                     createFixtureFile(); //why create it here if each file is dependent on the league number??
+
                 }
             }
             //losg
@@ -62,6 +65,7 @@ public class LeagueManagement5
                 {
                     createLeague();
                     generateFixtures();
+
                   
                 }
                 else if(choice2 == 1) //Manage existing league
@@ -121,8 +125,7 @@ public class LeagueManagement5
         boolean loggedIn = false;
         String inputName = "";
         String inputPassword = "";
-
-        inputName = JOptionPane.showInputDialog(null, "Please enter admin name"); //if password is entered for username the program shits itself
+        inputName = JOptionPane.showInputDialog(null, "Please enter admin name");
         if(inputName != null)
         {
             if(doesInputExist(admin, inputName, false))
@@ -130,10 +133,12 @@ public class LeagueManagement5
                 String temp[];
                 int attempts = 0;
                 int index = findAdminIdentifierNumber(inputName);
-                temp = stringAtLineNumber(admin, index).split(",");
+                System.out.println(index);
+                temp = stringAtIndexNumber(admin, index).split(",");
+                System.out.println(temp[1] + "," + temp[2]);
                 while(attempts < 3)
                 {
-                    inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]); 
+                    inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]);
                     if(inputPassword != null)
                     {
                         if(passwordCheck(inputPassword) && inputPassword.equals(temp[2]))
@@ -167,8 +172,6 @@ public class LeagueManagement5
 
         return loggedIn;
     }
-
-
 
     //Rian
     public static void checkSetup() throws IOException
@@ -206,9 +209,7 @@ public class LeagueManagement5
                 if(caseSensitive)
                 {
                     String aLineFromFile = in.nextLine();
-                    String aLineFromFileArray []  = aLineFromFile.split(",");
-
-                    if(aLineFromFileArray[1].contains(input))
+                    if(aLineFromFile.contains(input))
                     {
                         in.close();
                         return true;
@@ -217,8 +218,7 @@ public class LeagueManagement5
                 else
                 {
                     String aLineFromFile = in.nextLine().toLowerCase();
-                    String aLineFromFileArray []  = aLineFromFile.split(",");
-                    if(aLineFromFileArray[1].contains(input.toLowerCase()))
+                    if(aLineFromFile.contains(input.toLowerCase()))
                     {
                         in.close();
                         return true;
@@ -232,19 +232,26 @@ public class LeagueManagement5
 
     //Rian
     /*
-    stringAtLineNumber - returns the string at the line of a provided file
-    Inputs - file: file to be searched, lineNumber - the linenumber you want the string of
+    stringAtIndexNumber - returns the string at the line of a provided file
+    Inputs - file: file to be searched, lineNumber - the first int you want the string of
     Searches the file using a loop with index of lneNumber to get the string and return it
      */ 
-    public static String stringAtLineNumber(File file, int lineNumber) throws IOException
+    public static String stringAtIndexNumber(File file, int indexNumber) throws IOException
     {
         String result = "";
         if(file.exists())
         {
             Scanner in = new Scanner(file);
-
-            for(int i = 0; i < lineNumber && in.hasNext(); i++)
-                result = in.nextLine();
+            while(in.hasNext())
+            {
+                String temp = in.nextLine();
+                String index = temp.substring(0, temp.indexOf(","));
+                if(index.equals(String.valueOf(indexNumber)))
+                {
+                    result = temp;
+                    break;
+                }       
+            }
 
             in.close();
         }
@@ -413,18 +420,16 @@ public class LeagueManagement5
         int idNumber = 0;
         Scanner in = new Scanner(admin);
         String lastLine = "";
-
+        System.out.println(admin.length());
         if(admin.length() == 0)
         {    
             in.close();
-            return 0;
+            return idNumber;
         }
         else
         {
             while(in.hasNext())
-
                 lastLine = in.nextLine();
-
             idNumber = Integer.parseInt(lastLine.substring(0, lastLine.indexOf(",")));
             in.close();
             return idNumber;
@@ -433,27 +438,34 @@ public class LeagueManagement5
 
     //Rian
     /*
-    inputLeagueParticipants - Input participants until cancelled is pressed
-    Each input of the JOPtionpane is placed into an ArrayList. The array list is returned
+    inputLeagueParticipants - input team names until max number of teams is reached
      */
-    public static ArrayList<String> inputLeagueParticipants()
+    public static void createLeagueParticipants(int maxTeamNum) throws IOException
     {
         ArrayList<String> participants = new ArrayList<String>();
         String input = "";
-
-        while(true)
+        int teamCount = 0;
+        while(teamCount < maxTeamNum)
         {
             input = JOptionPane.showInputDialog(null, "Input participant");
             if(input != null)
                 if(stringCheck(input))
+                {
                     participants.add(input);
+                    teamCount++;
+                }
                 else
                     JOptionPane.showMessageDialog(null, "Incorrect format of participant");
             else
                 break;
         }
 
-        return participants;
+        int fileIDNumber = findLeagueIdentifierNumber();
+        File participantFile = new File(fileIDNumber + "_participants.txt");
+        PrintWriter out = new PrintWriter(participantFile);
+        for(int i = 0; i < participants.size(); i++)
+            out.println((i + 1) + "," + participants.get(i));
+        out.close();
     }
 
     //Rian
@@ -476,7 +488,7 @@ public class LeagueManagement5
             while(in.hasNext())
             {
                 String data = in.nextLine();
-                if(!data.toLowerCase().contains(adminToDelete))
+                if(!data.toLowerCase().contains(adminToDelete.toLowerCase()))
                     adminArray.add(data);
             }
             in.close();
@@ -523,22 +535,25 @@ public class LeagueManagement5
     {
         String participant = "_participants.txt";
         String results = "_results.txt";
-
+        String fixtures = "_fixtures.txt";
         ArrayList<Integer> leagueIDNumbers = getAdminLeagueIDs(adminName);
+
         for(int i = 0; i < leagueIDNumbers.size(); i++)
         {
             String tempParticipant = leagueIDNumbers.get(i) + participant;
+            String tempResults = leagueIDNumbers.get(i) + results;
+            String tempFixtures = leagueIDNumbers.get(i) + fixtures;
+
             File participantFile = new File(tempParticipant);
+            File resultsFile = new File(tempResults);
+            File fixtureFile = new File(tempFixtures);
+
             if(participantFile.exists())
-            {
-                String tempResults = leagueIDNumbers.get(i) + results;
-                File resultsFile = new File(tempResults);
-                if(resultsFile.exists())
-                {
-                    participantFile.delete();
-                    resultsFile.delete();
-                }
-            }
+                participantFile.delete();
+            if(resultsFile.exists())
+                resultsFile.delete();
+            if(fixtureFile.exists())
+                fixtureFile.delete();
         }
     }
 
@@ -581,31 +596,30 @@ public class LeagueManagement5
         {
             JOptionPane.showMessageDialog(null,"No leagues associated with this account!\nPlease create a league!"
             ,"Manage Leagues",1);
-            String choiceX = "-1";
-            return choiceX;
+            return null;
         }
-          else
+        else
         {
             String[] choices = new String[tableDropDown.size()];
             choices = tableDropDown.toArray(choices);
             String input =(String)(JOptionPane.showInputDialog(null, "Choose a league:",
-            "League Management",JOptionPane.QUESTION_MESSAGE, null, choices,choices[0]));
-            return input;       
+                        "League Management",JOptionPane.QUESTION_MESSAGE, null, choices,choices[0]));
+            return input;
             //delete league option and edit league option
         }
     }
 
     //losg
-    public static void generateFixtures() throws IOException
+    public static int generateFixtures() throws IOException
     {
 
-        int numOfTeams, totalRounds, numOfMatchesPerRound;
+        int numOfTeams = 0, totalRounds, numOfMatchesPerRound;
         int roundNum, matchNumber, homeTeamNum, awayTeamNum, even, odd;
-        int adminNum = findAdminIdentifierNumber(username.toString());
         boolean oddnumOfTeams = false;
-        File file = new File(adminNum + "_fixtures.txt");   
-        FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
-        PrintWriter out = new PrintWriter(fw);
+        int numOfTeamsCopy = 0;
+        File file = createFixtureFile();
+        
+        PrintWriter out = new PrintWriter(file);
         String selection;
         String [][] fixtures;
         String [][] revisedFixtures;
@@ -620,6 +634,7 @@ public class LeagueManagement5
 
             //if teams are odd, add one to number of teams 
             numOfTeams = Integer.parseInt(selection);
+            numOfTeamsCopy = numOfTeams;
             if(numOfTeams % 2 == 1){
 
                 numOfTeams++;
@@ -640,7 +655,7 @@ public class LeagueManagement5
                     awayTeamNum = (numOfTeams - 1 - matchNumber + roundNum) % (numOfTeams - 1);
                     if (matchNumber == 0) 
                         awayTeamNum = numOfTeams - 1;
-                    fixtures[roundNum][matchNumber]  = (homeTeamNum + 1) + "," + (awayTeamNum + 1);
+                    fixtures[roundNum][matchNumber]  = (homeTeamNum + 1) + "," + (awayTeamNum + 1) + "\n";
                 }   
             } 
 
@@ -665,18 +680,18 @@ public class LeagueManagement5
                     fixtures[roundNum][0] = elements[1] + "," + elements[0];
                 }
             } 
-            
-            int  lastLeagueNum =  findLeagueIdentifierNumber ();
-
+           int  lastLeagueNum =  findLeagueIdentifierNumber ();
             for (roundNum = 0; roundNum < totalRounds; roundNum++) 
             {  
                 for (matchNumber = 0; matchNumber < numOfMatchesPerRound; matchNumber++){ 
-                    out.println( lastLeagueNum + "," 
-                        + fixtures[roundNum][matchNumber]);
+                    out.printf( lastLeagueNum + "," 
+                        + fixtures[roundNum][matchNumber] + "\n");
+                    out.println("");
                 }
-            }        
+            }             
             out.close();
         }
+        return numOfTeamsCopy;
     }
 
     //losg
@@ -684,7 +699,7 @@ public class LeagueManagement5
     {
         int adminNum = findAdminIdentifierNumber(username.toString());
         File file = new File(adminNum + "_" + "fixtures" + ".txt");
-   
+        
         return file;
     }
 
@@ -972,6 +987,8 @@ public class LeagueManagement5
                     out.println( leagueNo + "," + leagueName + "," + usernameID);
                     out.close();
                     aFileWriter.close();
+                    int maxNum = generateFixtures();
+                    createLeagueParticipants(maxNum);
                 }
                 else
                 { 
