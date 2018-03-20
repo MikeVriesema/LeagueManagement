@@ -6,7 +6,6 @@ import java.io.*;
 import java.util.*;
 
 public class LeagueManagement
-
 {
     static StringBuilder username;
     static int usernameID;
@@ -24,8 +23,7 @@ public class LeagueManagement
         leagues = new File("leagues.txt");
         String options[] = {"Log in", "Create New Admin", "Quit"};
         String tableOptions[] = {"Create League", "Manage Existing League", "Delete Account", "Log Out"};
-
-        String leagueManageOptions[] = {"View Leaderboard","Edit Results", "Delete this League","Return to menu","View Teams"};
+        String leagueManageOptions[] = {"View Leaderboard", "Edit Results", "Delete this League","Return to menu"};
         int choice = -1;
         int choice2 = -1;
         int choice3 = -1;
@@ -52,8 +50,7 @@ public class LeagueManagement
                 {
 
                     createAdmin();
-                    createFixtureFile(); 
-
+                    createFixtureFile(); //why create it here if each file is dependent on the league number??
                 }
             }
             //losg
@@ -66,7 +63,6 @@ public class LeagueManagement
                 {
                     createLeague();
                     generateFixtures();
-
                   
                 }
                 else if(choice2 == 1) //Manage existing league
@@ -97,11 +93,6 @@ public class LeagueManagement
                         {
                             choice2 = 1;
                         }
-						else if(choice3 == 3)
-                        {
-							String teamRequest = displayTeams();
-                            JOptionPane.showMessageDialog(null,teamRequest,"Teams in league",1);
-                        }
                 }
                 else if(choice2 == 2) //Delete Admin
                 {
@@ -131,7 +122,8 @@ public class LeagueManagement
         boolean loggedIn = false;
         String inputName = "";
         String inputPassword = "";
-        inputName = JOptionPane.showInputDialog(null, "Please enter admin name");
+
+        inputName = JOptionPane.showInputDialog(null, "Please enter admin name"); //if password is entered for username the program shits itself
         if(inputName != null)
         {
             if(doesInputExist(admin, inputName, false))
@@ -139,12 +131,10 @@ public class LeagueManagement
                 String temp[];
                 int attempts = 0;
                 int index = findAdminIdentifierNumber(inputName);
-                System.out.println(index);
-                temp = stringAtIndexNumber(admin, index).split(",");
-                System.out.println(temp[1] + "," + temp[2]);
+                temp = stringAtLineNumber(admin, index).split(",");
                 while(attempts < 3)
                 {
-                    inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]);
+                    inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]); 
                     if(inputPassword != null)
                     {
                         if(passwordCheck(inputPassword) && inputPassword.equals(temp[2]))
@@ -178,6 +168,8 @@ public class LeagueManagement
 
         return loggedIn;
     }
+
+
 
     //Rian
     public static void checkSetup() throws IOException
@@ -215,7 +207,9 @@ public class LeagueManagement
                 if(caseSensitive)
                 {
                     String aLineFromFile = in.nextLine();
-                    if(aLineFromFile.contains(input))
+                    String aLineFromFileArray []  = aLineFromFile.split(",");
+
+                    if(aLineFromFileArray[1].contains(input))
                     {
                         in.close();
                         return true;
@@ -224,7 +218,8 @@ public class LeagueManagement
                 else
                 {
                     String aLineFromFile = in.nextLine().toLowerCase();
-                    if(aLineFromFile.contains(input.toLowerCase()))
+                    String aLineFromFileArray []  = aLineFromFile.split(",");
+                    if(aLineFromFileArray[1].contains(input.toLowerCase()))
                     {
                         in.close();
                         return true;
@@ -238,26 +233,19 @@ public class LeagueManagement
 
     //Rian
     /*
-    stringAtIndexNumber - returns the string at the line of a provided file
-    Inputs - file: file to be searched, lineNumber - the first int you want the string of
+    stringAtLineNumber - returns the string at the line of a provided file
+    Inputs - file: file to be searched, lineNumber - the linenumber you want the string of
     Searches the file using a loop with index of lneNumber to get the string and return it
      */ 
-    public static String stringAtIndexNumber(File file, int indexNumber) throws IOException
+    public static String stringAtLineNumber(File file, int lineNumber) throws IOException
     {
         String result = "";
         if(file.exists())
         {
             Scanner in = new Scanner(file);
-            while(in.hasNext())
-            {
-                String temp = in.nextLine();
-                String index = temp.substring(0, temp.indexOf(","));
-                if(index.equals(String.valueOf(indexNumber)))
-                {
-                    result = temp;
-                    break;
-                }       
-            }
+
+            for(int i = 0; i < lineNumber && in.hasNext(); i++)
+                result = in.nextLine();
 
             in.close();
         }
@@ -296,16 +284,16 @@ public class LeagueManagement
     public static String displayTeams() throws IOException //this method needs some work to make it more general
     {
         String teams="";
-        FileReader aFileReader = new FileReader("_participants.txt");
+        FileReader aFileReader = new FileReader("teams.txt");
         Scanner in = new Scanner(aFileReader);
         String aLineFromFile;
-		int i = 0;
         while(in.hasNext())
         {
+
             aLineFromFile = in.nextLine();
             String single[] = aLineFromFile.split(",");
-            teams   += "\n" + single[i];
-			i++;
+            teams   += "\n" + single[1];
+
         }
         in.close();
         aFileReader.close();
@@ -426,16 +414,18 @@ public class LeagueManagement
         int idNumber = 0;
         Scanner in = new Scanner(admin);
         String lastLine = "";
-        System.out.println(admin.length());
+
         if(admin.length() == 0)
         {    
             in.close();
-            return idNumber;
+            return 0;
         }
         else
         {
             while(in.hasNext())
+
                 lastLine = in.nextLine();
+
             idNumber = Integer.parseInt(lastLine.substring(0, lastLine.indexOf(",")));
             in.close();
             return idNumber;
@@ -444,34 +434,27 @@ public class LeagueManagement
 
     //Rian
     /*
-    inputLeagueParticipants - input team names until max number of teams is reached
+    inputLeagueParticipants - Input participants until cancelled is pressed
+    Each input of the JOPtionpane is placed into an ArrayList. The array list is returned
      */
-    public static void createLeagueParticipants(int maxTeamNum) throws IOException
+    public static ArrayList<String> inputLeagueParticipants()
     {
         ArrayList<String> participants = new ArrayList<String>();
         String input = "";
-        int teamCount = 0;
-        while(teamCount < maxTeamNum)
+
+        while(true)
         {
             input = JOptionPane.showInputDialog(null, "Input participant");
             if(input != null)
                 if(stringCheck(input))
-                {
                     participants.add(input);
-                    teamCount++;
-                }
                 else
                     JOptionPane.showMessageDialog(null, "Incorrect format of participant");
             else
                 break;
         }
 
-        int fileIDNumber = findLeagueIdentifierNumber();
-        File participantFile = new File(fileIDNumber + "_participants.txt");
-        PrintWriter out = new PrintWriter(participantFile);
-        for(int i = 0; i < participants.size(); i++)
-            out.println((i + 1) + "," + participants.get(i));
-        out.close();
+        return participants;
     }
 
     //Rian
@@ -494,7 +477,7 @@ public class LeagueManagement
             while(in.hasNext())
             {
                 String data = in.nextLine();
-                if(!data.toLowerCase().contains(adminToDelete.toLowerCase()))
+                if(!data.toLowerCase().contains(adminToDelete))
                     adminArray.add(data);
             }
             in.close();
@@ -541,25 +524,22 @@ public class LeagueManagement
     {
         String participant = "_participants.txt";
         String results = "_results.txt";
-        String fixtures = "_fixtures.txt";
-        ArrayList<Integer> leagueIDNumbers = getAdminLeagueIDs(adminName);
 
+        ArrayList<Integer> leagueIDNumbers = getAdminLeagueIDs(adminName);
         for(int i = 0; i < leagueIDNumbers.size(); i++)
         {
             String tempParticipant = leagueIDNumbers.get(i) + participant;
-            String tempResults = leagueIDNumbers.get(i) + results;
-            String tempFixtures = leagueIDNumbers.get(i) + fixtures;
-
             File participantFile = new File(tempParticipant);
-            File resultsFile = new File(tempResults);
-            File fixtureFile = new File(tempFixtures);
-
             if(participantFile.exists())
-                participantFile.delete();
-            if(resultsFile.exists())
-                resultsFile.delete();
-            if(fixtureFile.exists())
-                fixtureFile.delete();
+            {
+                String tempResults = leagueIDNumbers.get(i) + results;
+                File resultsFile = new File(tempResults);
+                if(resultsFile.exists())
+                {
+                    participantFile.delete();
+                    resultsFile.delete();
+                }
+            }
         }
     }
 
@@ -598,35 +578,36 @@ public class LeagueManagement
     public static String editLeague() throws IOException //identify league
     {   
         ArrayList<String> tableDropDown = getAdminLeagues();
+        String input = "-1";
         if(tableDropDown.size()==0)
         {
             JOptionPane.showMessageDialog(null,"No leagues associated with this account!\nPlease create a league!"
             ,"Manage Leagues",1);
-            return null;
+            return input;
         }
-        else
+          else
         {
             String[] choices = new String[tableDropDown.size()];
             choices = tableDropDown.toArray(choices);
-            String input =(String)(JOptionPane.showInputDialog(null, "Choose a league:",
-                        "League Management",JOptionPane.QUESTION_MESSAGE, null, choices,choices[0]));
-            return input;
+            input =(String)(JOptionPane.showInputDialog(null, "Choose a league:",
+            "League Management",JOptionPane.QUESTION_MESSAGE, null, choices,choices[0]));
+            return input;       
             //delete league option and edit league option
         }
     }
 
     //losg
-    public static int generateFixtures() throws IOException
-
+    //losg
+    public static void generateFixtures() throws IOException
     {
 
-        int numOfTeams = 0, totalRounds, numOfMatchesPerRound;
+        int numOfTeams, totalRounds, numOfMatchesPerRound;
         int roundNum, matchNumber, homeTeamNum, awayTeamNum, even, odd;
+        int adminNum = findAdminIdentifierNumber(username.toString());
         boolean oddnumOfTeams = false;
-        int numOfTeamsCopy = 0;
-        File file = createFixtureFile();
-        
-        PrintWriter out = new PrintWriter(file);
+        File file = new File(adminNum + "_fixtures.txt");   
+        FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+        PrintWriter out = new PrintWriter(fw);
         String selection;
         String [][] fixtures;
         String [][] revisedFixtures;
@@ -641,7 +622,6 @@ public class LeagueManagement
 
             //if teams are odd, add one to number of teams 
             numOfTeams = Integer.parseInt(selection);
-            numOfTeamsCopy = numOfTeams;
             if(numOfTeams % 2 == 1){
 
                 numOfTeams++;
@@ -662,7 +642,7 @@ public class LeagueManagement
                     awayTeamNum = (numOfTeams - 1 - matchNumber + roundNum) % (numOfTeams - 1);
                     if (matchNumber == 0) 
                         awayTeamNum = numOfTeams - 1;
-                    fixtures[roundNum][matchNumber]  = (homeTeamNum + 1) + "," + (awayTeamNum + 1) + "\n";
+                    fixtures[roundNum][matchNumber]  = (homeTeamNum + 1) + "," + (awayTeamNum + 1);
                 }   
             } 
 
@@ -687,25 +667,26 @@ public class LeagueManagement
                     fixtures[roundNum][0] = elements[1] + "," + elements[0];
                 }
             } 
-           int  lastLeagueNum =  findLeagueIdentifierNumber ();
+            
+            int  lastLeagueNum =  findLeagueIdentifierNumber ();
+
             for (roundNum = 0; roundNum < totalRounds; roundNum++) 
             {  
                 for (matchNumber = 0; matchNumber < numOfMatchesPerRound; matchNumber++){ 
-                    out.printf( lastLeagueNum + "," 
-                        + fixtures[roundNum][matchNumber] + "\n");
-                    out.println("");
+                    out.println( lastLeagueNum + "," 
+                        + fixtures[roundNum][matchNumber]);
                 }
-            }             
+            }        
             out.close();
         }
-        return numOfTeamsCopy;
     }
 
     //losg
     public static File createFixtureFile() throws IOException
     {
-        int adminNum = findAdminIdentifierNumber(username.toString());
-        File file = new File(adminNum + "_" + "fixtures" + ".txt")
+        int leagueNum = findLeagueIdentifierNumber();
+        File file = new File(leagueNum + "_" + "fixtures" + ".txt");
+      
         return file;
     }
     //losg - might be able to replace it with Mitch's checkInput
@@ -992,8 +973,6 @@ public class LeagueManagement
                     out.println( leagueNo + "," + leagueName + "," + usernameID);
                     out.close();
                     aFileWriter.close();
-                    int maxNum = generateFixtures();
-                    createLeagueParticipants(maxNum);
                 }
                 else
                 { 
