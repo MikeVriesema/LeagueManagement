@@ -25,7 +25,7 @@ public class LeagueManagement
         String options[] = {"Log in", "Create New Admin", "Quit"};
         String tableOptions[] = {"Create League", "Manage Existing League", "Delete Account", "Log Out"};
 
-        String leagueManageOptions[] = {"View Leaderboard", "Edit Results", "Delete this League","Return to menu"};
+        String leagueManageOptions[] = {"View Leaderboard","Edit Results", "Delete this League","Return to menu","View Teams"};
         int choice = -1;
         int choice2 = -1;
         int choice3 = -1;
@@ -51,7 +51,7 @@ public class LeagueManagement
                 else if(choice == 1)
                 {
                     createAdmin();
-                    createFixtureFile(); //why create it here if each file is dependent on the league number??
+                    createFixtureFile(); 
 
                 }
             }
@@ -71,9 +71,9 @@ public class LeagueManagement
                 else if(choice2 == 1) //Manage existing league
                 {
                     String selectedLeague = editLeague();
-                    if(selectedLeague.length()<3)
+                    if(selectedLeague == null)
                     {
-                        choice2 = Integer.parseInt(selectedLeague);
+                        choice2 = -1;
                     }
                     else
                     {
@@ -95,6 +95,11 @@ public class LeagueManagement
                         else if(choice3 == 3)
                         {
                             choice2 = 1;
+                        }
+						else if(choice3 == 3)
+                        {
+							String teamRequest = displayTeams();
+                            JOptionPane.showMessageDialog(null,teamRequest,"Teams in league",1);
                         }
                 }
                 else if(choice2 == 2) //Delete Admin
@@ -290,16 +295,16 @@ public class LeagueManagement
     public static String displayTeams() throws IOException //this method needs some work to make it more general
     {
         String teams="";
-        FileReader aFileReader = new FileReader("teams.txt");
+        FileReader aFileReader = new FileReader("_participants.txt");
         Scanner in = new Scanner(aFileReader);
         String aLineFromFile;
+		int i = 0;
         while(in.hasNext())
         {
-
             aLineFromFile = in.nextLine();
             String single[] = aLineFromFile.split(",");
-            teams   += "\n" + single[1];
-
+            teams   += "\n" + single[i];
+			i++;
         }
         in.close();
         aFileReader.close();
