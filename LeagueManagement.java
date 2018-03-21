@@ -64,7 +64,6 @@ public class LeagueManagement
                 if(choice2 == 0) //Create new league
                 {
                     createLeague();
-                    generateFixtures();
 
                 }
                 else if(choice2 == 1) //Manage existing league
@@ -89,16 +88,20 @@ public class LeagueManagement
                     }
                     else if(choice3 == 2)
                     {
-                        //deleteSelectedLeague(selectedLeague);
+                        if(JOptionPane.showConfirmDialog(null, "Are you sure?", "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+                        {
+                            deleteSelectedLeague(selectedLeague);
+                            choice2 = 0;
+                        }
                     }
                     else if(choice3 == 3)
                     {
                         choice2 = 1;
                     }
-                    else if(choice3 == 3)
+                    else if(choice3 == 4)
                     {
-                        String teamRequest = displayTeams();
-                        JOptionPane.showMessageDialog(null,teamRequest,"Teams in league",1);
+                        displayTeams(selectedLeague);
+                        //System.out.print(teamRequest);
                     }
                 }
                 else if(choice2 == 2) //Delete Admin
@@ -137,9 +140,7 @@ public class LeagueManagement
                 String temp[];
                 int attempts = 0;
                 int index = findAdminIdentifierNumber(inputName);
-                System.out.println(index);
                 temp = stringAtIndexNumber(admin, index).split(",");
-                System.out.println(temp[1] + "," + temp[2]);
                 while(attempts < 3)
                 {
                     inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]);
@@ -291,23 +292,21 @@ public class LeagueManagement
     }
 
     //love from RyAn 
-    public static String displayTeams() throws IOException //this method needs some work to make it more general
+    public static void displayTeams(String selectedLeague) throws IOException //this method needs some work to make it more general
     {
         String teams="";
-        FileReader aFileReader = new FileReader("_participants.txt");
+        int numOfLeague = LeagueNumberFromName(selectedLeague);
+        FileReader aFileReader = new FileReader(numOfLeague+"_participants.txt");
         Scanner in = new Scanner(aFileReader);
-        String aLineFromFile;
-        int i = 0;
         while(in.hasNext())
         {
-            aLineFromFile = in.nextLine();
-            String single[] = aLineFromFile.split(",");
-            teams   += "\n" + single[i];
-            i++;
+            String aLineFromFile = in.nextLine();
+            String[] temp =  aLineFromFile.split(",");
+            teams += temp[1]+"\n";
         }
+        JOptionPane.showMessageDialog(null,teams,"Teams in league",1); 
         in.close();
         aFileReader.close();
-        return teams;
     }
 
     public static void createAdmin() throws IOException  //creates admin username and password and stores them in the file administrator.txt already made by rian 
@@ -450,7 +449,6 @@ public class LeagueManagement
         ArrayList<String> participants = new ArrayList<String>();
         String input = "";
         int teamCount = 0;
-        System.out.println(maxTeamNum);
         while(teamCount < maxTeamNum)
         {
             input = JOptionPane.showInputDialog(null, "Input participant");
@@ -459,7 +457,6 @@ public class LeagueManagement
                 {
                     participants.add(input);
                     teamCount++;
-                    System.out.println(teamCount);
                 }
                 else
                     JOptionPane.showMessageDialog(null, "Incorrect format of participant");
@@ -1086,7 +1083,7 @@ public class LeagueManagement
                     aFileWriter.close();
                     int maxNum = generateFixtures();
                     createLeagueParticipants(maxNum);
-                    createResults(maxNum);
+                    //createResults(maxNum);
                 }
                 else
                 { 
@@ -1120,46 +1117,67 @@ public class LeagueManagement
             }
 
         }
+        in.close();
         return leagueNumber;
     }
     //Please Find attached the Keep and not keep version of this method to delete the League
     //it replaces it with null, but i will fix that tomorrow, but its done incase yous think i did nothing ily xoxo 
-    public static void deleteLeague(String leagueNameToDel) throws IOException
+    public static void deleteSelectedLeague(String leagueNameToDel) throws IOException
     {
         int leagueNumToDelete = LeagueNumberFromName(leagueNameToDel);
-        int leagueNumber;
-        String leagueName, leagueInfo;
         int findLeagueNumber = findLeagueIdentifierNumber();
-        String [] leaguesToKeep = new String[findLeagueNumber];
-
-        FileReader aFileReader = new FileReader("leagues.txt");
-        Scanner in = new Scanner (aFileReader) ;
-
-        int i = 0 ;
+        ArrayList<String> leaguesToKeep = new ArrayList<String>();
+        Scanner in = new Scanner (leagues) ;
         while(in.hasNext())
         {
-            leagueInfo= in.nextLine();
+            String leagueInfo= in.nextLine();
             String leagueInfoArr[] = leagueInfo.split(",");
-            leagueNumber = Integer.parseInt(leagueInfoArr[0]);
+            leaguesToKeep.add(leagueInfo);
 
-            if(!(leagueNumber == leagueNumToDelete))
+        }
+        for(int i = 0; i < leaguesToKeep.size(); i++)
+        {
+            if(leaguesToKeep.get(i).startsWith(Integer.toString(leagueNumToDelete)))
             {
-                leaguesToKeep[i] = leagueInfo;
+                leaguesToKeep.remove(i);
             }
-            i++;
         }
 
-        FileWriter aFileWriter = new FileWriter("leagues.txt"); 
-        PrintWriter out = new PrintWriter(aFileWriter);
-
-        for( int j = 0 ; j<findLeagueNumber ; j++)
+        PrintWriter out = new PrintWriter(leagues);
+        for( int j = 0 ; j<leaguesToKeep.size() ; j++)
         {
-            String temp = leaguesToKeep[j];
+            String temp = leaguesToKeep.get(j);
             out.println(temp);
         }
-
+        deleteLeagueTeamsAndResults(leagueNumToDelete);
         out.close();
         in.close();
-        aFileReader.close();
+    }
+
+    public static void deleteLeagueTeamsAndResults(int leagueID) throws IOException
+    {
+        String participant = "_participants.txt";
+        String results = "_results.txt";
+        String fixture = "_fixtures.txt";   
+        String tempParticipant = leagueID + participant;
+        File participantFile = new File(tempParticipant);
+        if(participantFile.exists())
+        {   
+            participantFile.delete();
+        }
+        String tempFixture = leagueID + fixture;
+        File fixtureFile = new File(tempFixture);
+
+        if(fixtureFile.exists())
+        {
+            fixtureFile.delete();
+        }
+        String tempResults = leagueID + results;
+        File resultsFile = new File(tempResults);  
+
+        if(resultsFile.exists())
+        {
+            resultsFile.delete();
+        }
     }
 }
