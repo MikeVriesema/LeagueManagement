@@ -476,63 +476,6 @@ public class LeagueManagement
         out.close();
     }	
 	
-	
-	//Losg Creates results
-	public static void createResults(int maxTeamNum) throws IOException
-    {   
-
-        ArrayList<String> results = new ArrayList<String>();
-        ArrayList<String> fixture = new ArrayList<String>();
-        int leagueNumber = findLeagueIdentifierNumber();
-        FileReader partFile = new FileReader(leagueNumber + "_participants.txt");
-        FileReader fixFile = new FileReader(leagueNumber + "_fixtures.txt");
-
-        String input = "";
-        int teamCount = 0;
-       
-        Scanner in = new Scanner(partFile);
-        Scanner inFix = new Scanner(fixFile);
-        while(inFix.hasNextLine())
-        {   
-            String data = in.nextLine();
-            String dataArrayPart[] = data.split(",");
-            String dataFix = inFix.nextLine();
-            String dataArrayFix[] = dataFix.split(",");
-
-            
-                input = JOptionPane.showInputDialog(null, "Input score for home team in match: " + dataArrayFix[1] + "v" + dataArrayFix[2]);
-                    
-                if(input != null){
-                    if(integerCheck(Integer.parseInt(input)))
-                    {
-                    results.add(input);
-                    }
-                }
-
-                else{
-                    JOptionPane.showMessageDialog(null, "Incorrect format of result");
-                }
-                
-                input = JOptionPane.showInputDialog(null, "Input score for away team in match: " +  dataArrayFix[1] + "v" + dataArrayFix[2]);
-                    
-                if(input != null){
-                    if(integerCheck(Integer.parseInt(input)))
-                    {
-                    results.add(input);
-                    }
-                }
-                else{
-                    JOptionPane.showMessageDialog(null, "Incorrect format of participant");
-                }
-
-        }
-
-        File resultFile = new File(leagueNumber + "_results.txt");
-        PrintWriter out = new PrintWriter(resultFile);
-        for(int i = 0; i < results.size(); i++) 
-            out.println(leagueNumber + "," + results.get(i));
-        out.close();        
-    }
 
     /*/what needs to be done - Check if home/away team update. create array with the results. use this file struct 
     FixtureNumber,HomeParticipantScore,AwayParticipantScore /*/
@@ -687,40 +630,8 @@ public class LeagueManagement
         }
     }
     
-
-    /*
-    Removes the leagues that the provided admin controls from the leagues.txt file
-     */
-    public static void deleteLeague(String adminName) throws IOException
-    {
-        ArrayList<String> leaguesToKeep = new ArrayList<String>();
-        ArrayList<Integer> deleteLeagueNumbers = getAdminLeagueIDs(adminName);
-        Scanner in = new Scanner(leagues);
-
-        while(in.hasNext()) //Fill String array
-        {
-            String data = in.nextLine();
-            leaguesToKeep.add(data);
-        }
-        in.close();
-
-        for(int i = 0; i < deleteLeagueNumbers.size(); i++) //Remove lines using ArrayList of lines to remove
-        {
-            for(int j = 0; j < leaguesToKeep.size(); j++)
-            {
-                if(leaguesToKeep.get(j).startsWith(deleteLeagueNumbers.get(i).toString()))
-                    leaguesToKeep.remove(j);
-            }
-        }
-        PrintWriter out = new PrintWriter(leagues);
-        for(int i = 0; i < leaguesToKeep.size(); i++)
-            out.println(leaguesToKeep.get(i));
-        out.close();
-    }
-
-
     //Mitch,sort leagues for respective admin
-    public static void editLeague() throws IOException //identify league
+    public static String editLeague() throws IOException //identify league
     {   
         ArrayList<String> tableDropDown = getAdminLeagues();
         if(tableDropDown.size()==0)
