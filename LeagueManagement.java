@@ -669,13 +669,15 @@ public class LeagueManagement
         {
             JOptionPane.showMessageDialog(null,"No leagues associated with this account!\nPlease create a league!"
             ,"Manage Leagues",1);
+		return null;
         }
         else
         {
             String[] choices = new String[tableDropDown.size()];
             choices = tableDropDown.toArray(choices);
             String input =(String)(JOptionPane.showInputDialog(null, "Choose a league:",
-                        "League Management",JOptionPane.QUESTION_MESSAGE, null, choices,choices[0])); 
+                        "League Management",JOptionPane.QUESTION_MESSAGE, null, choices,choices[0]));
+		return input;
             //delete league option and edit league option
         }
     }
