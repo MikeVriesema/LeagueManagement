@@ -1,3 +1,4 @@
+
 /**
  * LeagueManagement
  */
@@ -29,6 +30,8 @@ public class LeagueManagement
         int choice = -1;
         int choice2 = -1;
         int choice3 = -1;
+        boolean isLeagueSelected = false; //used to check if user has chosen a league
+        String selectedLeague = ""; //League currently selected at league management
         String loggedInUser = "You are currently not logged in:\n\n";
         username = new StringBuilder("");
 
@@ -68,40 +71,52 @@ public class LeagueManagement
                 }
                 else if(choice2 == 1) //Manage existing league
                 {
-                    String selectedLeague = editLeague();
-                    if(selectedLeague == null)
+                    while(true)
                     {
-                        choice2 = -1;
-                    }
-                    else
-                    {
-                        choice3 = JOptionPane.showOptionDialog(null, loggedInUser + "Select a league option:","League Manager for:"+ selectedLeague,JOptionPane.YES_NO_OPTION, 
-                            1, null, leagueManageOptions, leagueManageOptions[0]);
-                    }
-                    if(choice3 == 0)
-                    {
-                        generateLeagueTable();
-                    }
-                    else if(choice3 == 1)
-                    {
-                        //edit results
-                    }
-                    else if(choice3 == 2)
-                    {
-                        if(JOptionPane.showConfirmDialog(null, "Are you sure?", "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+                        if(!isLeagueSelected)
                         {
-                            deleteSelectedLeague(selectedLeague);
-                            choice2 = 0;
+                            selectedLeague = editLeague();
+                            isLeagueSelected = true;
                         }
-                    }
-                    else if(choice3 == 3)
-                    {
-                        choice2 = 1;
-                    }
-                    else if(choice3 == 4)
-                    {
-                        displayTeams(selectedLeague);
-                        //System.out.print(teamRequest);
+                        if(selectedLeague == null)
+                        {
+                            choice2 = -1;
+                            break;
+                        }
+                        else
+                        {
+                            choice3 = JOptionPane.showOptionDialog(null, loggedInUser + "Select a league option:","League Manager for:"+ selectedLeague,JOptionPane.YES_NO_OPTION, 
+                                1, null, leagueManageOptions, leagueManageOptions[0]);
+                        }
+                        if(choice3 == 0)
+                        {
+                            generateLeagueTable();
+                        }
+                        else if(choice3 == 1)
+                        {
+                            //edit results
+                        }
+                        else if(choice3 == 2)
+                        {
+                            if(JOptionPane.showConfirmDialog(null, "Are you sure?", "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+                            {
+                                deleteSelectedLeague(selectedLeague);
+                                choice2 = 0;
+                                isLeagueSelected = false;
+                                break;
+                            }
+                        }
+                        else if(choice3 == 3)
+                        {
+                            isLeagueSelected = false;
+                            choice2 = 1;
+                            break;
+                        }
+                        else if(choice3 == 4)
+                        {
+                            displayTeams(selectedLeague);
+                            //System.out.print(teamRequest);
+                        }
                     }
                 }
                 else if(choice2 == 2) //Delete Admin
