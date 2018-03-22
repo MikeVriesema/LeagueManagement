@@ -1,4 +1,3 @@
-
 /**
  * LeagueManagement
  */
@@ -7,7 +6,6 @@ import java.io.*;
 import java.util.*;
 
 public class LeagueManagement
-
 {
     static StringBuilder username;
     static int usernameID;
@@ -142,6 +140,14 @@ public class LeagueManagement
         }while(choice != 2 && choice2 !=4);
     }
 
+    /**
+     * Log in sequence when log in is pressed in main menu
+     * Asks for admin name and gives the user three attempts
+     * to enter the admins password.
+     * @param adminFile Admin file passed to check if provided admin exists
+     * @param user      Used to set global Stringbuilder object to the logged in users name
+     * @return          Boolean to see if log in was successful 
+     */
     public static boolean logInSequence(File adminFile, StringBuilder user) throws IOException
     {
         boolean loggedIn = false;
@@ -150,50 +156,58 @@ public class LeagueManagement
         inputName = JOptionPane.showInputDialog(null, "Please enter admin name");
         if(inputName != null)
         {
-            if(doesInputExist(admin, inputName, false))
+            if(stringCheck(inputName))
             {
-                String temp[];
-                int attempts = 0;
-                int index = findAdminIdentifierNumber(inputName);
-                temp = stringAtIndexNumber(admin, index).split(",");
-                while(attempts < 3)
+                if(doesInputExist(admin, inputName, false))
                 {
-                    inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]);
-                    if(inputPassword != null)
+                    String temp[];
+                    int attempts = 0;
+                    int index = findAdminIdentifierNumber(inputName);
+                    temp = stringAtIndexNumber(admin, index).split(",");
+                    while(attempts < 3)
                     {
-                        if(passwordCheck(inputPassword) && inputPassword.equals(temp[2]))
+                        inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]);
+                        if(inputPassword != null)
                         {
-                            JOptionPane.showMessageDialog(null, "Succesfully logged in!");
-                            user.append(temp[1]);
-                            loggedIn = true;
-                            break;
-                        }
-                        else if(attempts < 3)
-                        {
-                            if(attempts == 2)
+                            if(passwordCheck(inputPassword) && inputPassword.equals(temp[2]))
                             {
-                                attempts++;
-                                JOptionPane.showMessageDialog(null, "No attempts left!");
+                                JOptionPane.showMessageDialog(null, "Succesfully logged in!");
+                                user.append(temp[1]);
+                                loggedIn = true;
+                                break;
                             }
-                            else
-                            {    
-                                attempts++;
-                                JOptionPane.showMessageDialog(null, "Incorrect password\n" + (3 - attempts) + " attempts left");
+                            else if(attempts < 3)
+                            {
+                                if(attempts == 2)
+                                {
+                                    attempts++;
+                                    JOptionPane.showMessageDialog(null, "No attempts left!");
+                                }
+                                else
+                                {    
+                                    attempts++;
+                                    JOptionPane.showMessageDialog(null, "Incorrect password\n" + (3 - attempts) + " attempts left");
+                                }
                             }
                         }
+                        else
+                            break;
                     }
-                    else
-                        break;
                 }
+                else
+                    JOptionPane.showMessageDialog(null, inputName + " is not an existing admin");
             }
             else
-                JOptionPane.showMessageDialog(null, inputName + " is not an existing admin");
+                JOptionPane.showMessageDialog(null, "Incorrect format for admin");
         }
 
         return loggedIn;
     }
 
-    //Rian
+    /**
+     * Checks to see whether there is the administartor and leagues file in the file directory,
+     * if not, then they are created
+     */
     public static void checkSetup() throws IOException
     {
         if(!admin.exists() && !leagues.exists())
@@ -214,10 +228,14 @@ public class LeagueManagement
             file2.close();
         }
     }
-    //Rian
-    /*
-    DoesInputExist - returns a boolean saying whether a provided string exists in a file
-    Inputs - filename: file to search, input: string to search for, caseSensitive - use for case sensitivity
+
+    /**
+     * Returns a boolean to see if the input provided exists in the passed in file.
+     * Can also check for case sensitive inputs
+     * @param filename      The file for the method to search through
+     * @param input         The input for the method to search for
+     * @param caseSensitive Boolean to say whether the search should be case sensitive or not
+     * @return              boolean based on if the input exists or not 
      */
     public static boolean doesInputExist(File filename, String input, boolean caseSensitive) throws IOException
     {
@@ -250,12 +268,13 @@ public class LeagueManagement
         return false;
     }
 
-    //Rian
-    /*
-    stringAtIndexNumber - returns the string at the line of a provided file
-    Inputs - file: file to be searched, lineNumber - the first int you want the string of
-    Searches the file using a loop with index of lneNumber to get the string and return it
-     */ 
+    /**
+     * Returns the string at a line in the file provided based on the index number
+     * which is the first number on each line.
+     * @param file        The file to search
+     * @param indexNumber The first number on a line to search for
+     * @return            Line matching the indexNumber
+     */
     public static String stringAtIndexNumber(File file, int indexNumber) throws IOException
     {
         String result = "";
@@ -278,11 +297,12 @@ public class LeagueManagement
         return result;
     }
 
-    //Modified by Rian
-    /*
-    findAdminIdentifierNumber - returns the identifier number of a provided admin
-    Inputs - adminName: name of admin whose ID you want to get
-    Searches for admin name in the file, splits on comma and returns the int ID
+    /**
+     * Return an int which corresponds to the admin name provided.
+     * Searches the admin file for the provided admin name and if found returns
+     * the admins ID number.
+     * @param adminName The admin name to search for
+     * @return          The ID of the provided admin
      */
     public static int findAdminIdentifierNumber(String adminName) throws IOException
     {
@@ -306,11 +326,41 @@ public class LeagueManagement
         return identifier;
     }
 
-    //love from RyAn 
+    /** 
+     * Returns the last admin ID in the administrators.txt file.
+     * Goes through the file until the last line is reached and returns
+     * the ID found at the last line
+     * @return ID of the last admin in the admin file
+     */
+    public static int findLastAdminNumber() throws IOException
+    {
+        int idNumber = 0;
+        Scanner in = new Scanner(admin);
+        String lastLine = "";
+        if(admin.length() == 0)
+        {    
+            in.close();
+            return idNumber;
+        }
+        else
+        {
+            while(in.hasNext())
+                lastLine = in.nextLine();
+            idNumber = Integer.parseInt(lastLine.substring(0, lastLine.indexOf(",")));
+            in.close();
+            return idNumber;
+        }
+    }
+
+    /**
+     * Display teams takes in the name of a league, it then finds the league number associated with the name of the leauge. Then
+     * looks at the participants text file related to the league and shows all the participants in the file.
+     * @param selectedLeague  The name of the league selected is passed in to get the names of the participants in the league.
+     */
     public static void displayTeams(String selectedLeague) throws IOException //this method needs some work to make it more general
     {
         String teams="";
-        int numOfLeague = LeagueNumberFromName(selectedLeague);
+        int numOfLeague = getLeagueIDFromName(selectedLeague);
         FileReader aFileReader = new FileReader(numOfLeague+"_participants.txt");
         Scanner in = new Scanner(aFileReader);
         while(in.hasNext())
@@ -324,6 +374,11 @@ public class LeagueManagement
         aFileReader.close();
     }
 
+    /**
+     *	Create Admin asks the user to input a username and password , it checks both to see if they fit the pattern assigned to each. 
+     *	It also checks if the username is already being used and displays an error if needed. If the username and password fit the 
+     *	criteria they are stored to the admin text file.
+     */
     public static void createAdmin() throws IOException  //creates admin username and password and stores them in the file administrator.txt already made by rian 
     {
         int lastNumber, newNumber;
@@ -382,14 +437,20 @@ public class LeagueManagement
         aFileWriter.close();
     }
 
-    //Mitch,string check against pattern
+    /** Returns a boolean if a string fits pattern.
+     * @param String input
+     * @return boolean
+     */
     public static boolean stringCheck(String input) 
     {
         String pattern = "[a-z A-Z]{1,20}"; 
         return(input.matches(pattern));
     }
 
-    //Mitch,number against pattern
+    /** Returns a boolean if integer fits pattern.
+     * @param int input
+     * @return boolean
+     */
     public static boolean integerCheck(int input) 
     {
         String resultInt = ""+input;
@@ -397,7 +458,10 @@ public class LeagueManagement
         return(resultInt.matches(pattern));
     }
 
-    //Mitch,general password check against pattern 
+    /** Returns a boolean if a string (of password order) fits pattern.
+     * @param String input
+     * @return boolean
+     */
     public static boolean passwordCheck(String input) 
     {
         String resultPassword = ""+input;
@@ -405,7 +469,10 @@ public class LeagueManagement
         return(resultPassword.matches(pattern));
     }
 
-    //Mitch, returns an arraylist of leagues that match the logged in admin and forwards it to the dropdown option pane for management
+    /** getAdminLeagues returns an arraylist of leagues that match the logged in admin and forwards 
+     *it to the dropdown option pane for league management.
+     * @return ArrayList<String> tableDropDown 
+     */
     public static ArrayList<String> getAdminLeagues() throws IOException 
     {
         Scanner in = new Scanner(leagues);
@@ -427,37 +494,11 @@ public class LeagueManagement
         return tableDropDown;
     }
 
-    /*
-    Returns the number of the last admin in the administrators file
-    Inputs - None
-    Loops through every line until the end is reached, splits the last line on a comma
-    returns the ID number
-     */
-    public static int findLastAdminNumber() throws IOException
-    {
-        int idNumber = 0;
-        Scanner in = new Scanner(admin);
-        String lastLine = "";
-        System.out.println(admin.length());
-        if(admin.length() == 0)
-        {    
-            in.close();
-            return idNumber;
-        }
-        else
-        {
-            while(in.hasNext())
-                lastLine = in.nextLine();
-            idNumber = Integer.parseInt(lastLine.substring(0, lastLine.indexOf(",")));
-            in.close();
-            return idNumber;
-        }
-    }
-
-    //Rian
-    /*
-    inputLeagueParticipants - Input participants until cancelled is pressed
-    Each input of the JOPtionpane is placed into an ArrayList. The array list is returned
+    /**
+     * Displays a JOption pane asking the user to enter the name of a participant in their league.
+     * The names entered are placed in an array list which is then printed to a file
+     * with the league number followed by '_participants.txt'.
+     * @param maxTeamNum The maximum number of teams allowed in the league
      */
     public static void createLeagueParticipants(int maxTeamNum) throws IOException
     {
@@ -543,12 +584,11 @@ public class LeagueManagement
         out.close();        
     }
 
-    //Rian
-    /*
-    deleteAdmin - Deletes the admin which equals the provided admin.
-    Firstly deletes participant and results files from the league which the admin controls
-    secondly deletes the leagues which the admin controls
-    lastly deletes name from admin file
+    /**
+     * Deletes the admin with the provided name. This includes first deleting the teams, results
+     * and fixtures associated with the admin. Then removes the leagues owned by that admin from 
+     * the leagues file and finally removes the admin name from the admin file.
+     * @param adminToDelete The name of the admin to delete
      */
     public static void deleteAdmin(String adminToDelete) throws IOException
     {
@@ -563,7 +603,7 @@ public class LeagueManagement
             while(in.hasNext())
             {
                 String data = in.nextLine();
-                if(!data.toLowerCase().contains(adminToDelete))
+                if(!data.toLowerCase().contains(adminToDelete.toLowerCase()))
                     adminArray.add(data);
             }
             in.close();
@@ -577,9 +617,11 @@ public class LeagueManagement
             JOptionPane.showMessageDialog(null, "Cannot delete this admin as it doesn't exist");
     }
 
-    /*
-    getAdminLeagueIDs - returns an Integer ArrayList containing the leagueIDs which are managed by the 
-    inputted admin. This is done by comparing adminID with the owner ID of the league.
+    /**
+     * Returns an array list of Integers which correspond to the league IDs of the leagues
+     * owned by the provided admin.
+     * @param adminName Name of the admin whose owned league IDs to be returned
+     * @return          ArrayList of Integers containing league IDs of the admin
      */
     public static ArrayList<Integer> getAdminLeagueIDs(String adminName) throws IOException 
     {
@@ -602,9 +644,10 @@ public class LeagueManagement
         return leagueIDs;
     }
 
-    /*
-    deleteLeagueTeamsandResults - deltes the teams and results associated with the leagues that the provided
-    admin name owns
+    /**
+     * Deletes the fixtures, participants nad results files 
+     * associated with a the admin name provided. 
+     * @param adminName Name of the admin whose files should be deleted
      */
     public static void deleteLeagueTeamsAndResults(String adminName) throws IOException
     {
@@ -638,7 +681,10 @@ public class LeagueManagement
         }
     }
 
-    //Mitch,sort leagues for respective admin
+    /** editLeague does a check when called to see if a league belonging to the admin exists
+     * then it reurns a selected league to edit as a string from a JOptionPane drop down menu.
+     * @return String input
+     */
     public static String editLeague() throws IOException //identify league
     {   
         ArrayList<String> tableDropDown = getAdminLeagues();
@@ -781,10 +827,11 @@ public class LeagueManagement
         out.close();
     } 
 
-    /*
-    Removes the leagues that the provided admin controls from the leagues.txt file
+    /**
+     * Removes the leagues owned by provided admin name from the leagues.txt file.
+     * If more than one league is owned then it deltes all of them.
+     * @param adminName Name of the admin whose leagues will be delted
      */
-
     public static void deleteAdminLeagues(String adminName) throws IOException
     {
         ArrayList<String> leaguesToKeep = new ArrayList<String>();
@@ -842,9 +889,29 @@ public class LeagueManagement
             }
         }  
         return input;
-    }     
+    }  
 
-    //Mitch,Generation of League Table
+    /**
+     * Returns the amount of participants in a specific league
+     * @param leagueNum league ID num to be searched
+     * @return          Number of participants in the league
+     */
+    public static int getAmountOfParticipants(int leagueNum) throws IOException
+    {
+        File aFile = new File(leagueNum + "_participants.txt");
+        Scanner in = new Scanner(aFile);
+        String data = "";
+        while(in.hasNext())
+            data = in.nextLine();
+
+        in.close();
+        return Integer.parseInt(data.substring(0,1));
+    }
+
+    /** generateLeagueTable method calls all of the subsequent methods required for
+     *the creation of the league table. It has an initial check to see if all the files
+     *exist by running the readFilesIntoArrayLists method.
+     */
     public static void generateLeagueTable() throws IOException
     {
         {
@@ -862,16 +929,21 @@ public class LeagueManagement
         }
     } 
 
+    /** readFilesIntoArrayLists method reads the data inside the files
+     * of participants,fixtures and results to allow them to be used in the
+     * generation of a league table. It saves the need for unnecessary disk access
+     * for files and easier comparison of data.
+     */
     public static boolean readFilesIntoArrayLists() throws IOException
     {
-        String file1 = "Teams.txt";
-        String file2 = "Fixtures.txt";
-        String file3 = "Results.txt";
+        String filePart = "_participants.txt";
+        String fileFixt = "_fixtures.txt";
+        String fileResu = "_results.txt";
 
         String filesList[];
-        File inputFile1 = new File(file1);
-        File inputFile2 = new File(file2);
-        File inputFile3 = new File(file3);
+        File inputFile1 = new File(filePart);
+        File inputFile2 = new File(fileFixt);
+        File inputFile3 = new File(fileResu);
 
         teams = new ArrayList<ArrayList<String>>();
         teams.add(new ArrayList<String>());
@@ -922,18 +994,27 @@ public class LeagueManagement
             return false;
     }
 
+    /** createEmptyLeaderBoard method receives the dimensions
+     * needed to create the blank leaderboard in the form of a
+     * 2D array.
+     */
     public static void createEmptyLeaderBoard()
-    {
-        // find out the number of teams/players which will determine 
-        // the number of rows  
+    {  
         int rows = teams.get(0).size();
         int columns = 14;  
         leaderBoard = new int[rows][columns];
-        // place team numbers in column 0 of leader board
         for (int i = 0; i < leaderBoard.length; i++)
+        {
             leaderBoard[i][0] = Integer.parseInt(teams.get(0).get(i));
+        }
     }     
 
+    /** processResults method retrieves all the results from the arraylist
+     * and assigns the corresponding values to several integers that are used 
+     * in the creation of the filled in leaderBoard. There are 3 if checks to
+     * test home team score against away team score and sends them to the
+     * corresponding methods for fixture result.
+     */
     public static void processResults()
     {
         int fixtureNumber, homeTeamScore, awayTeamScore, homeTeamNumber, awayTeamNumber;
@@ -964,55 +1045,82 @@ public class LeagueManagement
         }
     }    
 
-    public static void recordFixtureResultForHomeTeam(int hTN, int w, int d, int l, 
-    int hTS, int aTS, int p)
+    /** Receives the home team details and carries out the necessary calculations
+     * to create the statistics for each column in the leaderBoard.
+     * @param int homeTeamNum = Home Team Number
+     * @param int wins = Home Team Wins
+     * @param int draws = Home Team Draws
+     * @param int losses = Home Team Losses
+     * @param int homeTeamScore = Home Team Score
+     * @param int awayTeamScore = Away Team Score
+     * @param int totalPoints = Home Team Total Points
+     */
+    public static void recordFixtureResultForHomeTeam(int homeTeamNum, int wins, int draws, int losses, 
+    int homeTeamScore, int awayTeamScore, int totalPoints)
     {
-        leaderBoard[hTN-1][1]++;                    // gamesPlayed
-        leaderBoard[hTN-1][2]+= w;                  // homeWin
-        leaderBoard[hTN-1][3]+= d;                  // homeDraw
-        leaderBoard[hTN-1][4]+= l;                  // homeLoss
-        leaderBoard[hTN-1][5]+= hTS;                // homeTeamScore
-        leaderBoard[hTN-1][6]+= aTS;                // awayTeamScore
-        leaderBoard[hTN-1][12] += (hTS - aTS);      // goalDifference
-        leaderBoard[hTN-1][13] += p;                // points
+        leaderBoard[homeTeamNum-1][1]++;                    				// gamesPlayed
+        leaderBoard[homeTeamNum-1][2]+= wins;                  				// homeWin
+        leaderBoard[homeTeamNum-1][3]+= draws;                  			// homeDraw
+        leaderBoard[homeTeamNum-1][4]+= losses;                  			// homeLoss
+        leaderBoard[homeTeamNum-1][5]+= homeTeamScore;                		// homeTeamScore
+        leaderBoard[homeTeamNum-1][6]+= awayTeamScore;                		// awayTeamScore
+        leaderBoard[homeTeamNum-1][12] += (homeTeamScore - awayTeamScore);  // goalDifference
+        leaderBoard[homeTeamNum-1][13] += totalPoints;                		// points
     }
 
-    public static void recordFixtureResultForAwayTeam(int aTN, int w, int d, int l, 
-    int hTS, int aTS, int p)
+    /** Receives the away team details and carries out the necessary calculations
+     * to create the statistics for each column in the leaderBoard.
+     * @param int awayTeamNum = Away Team Number
+     * @param int wins = Away Team Wins
+     * @param int draws = Away Team Draws
+     * @param int losses = Away Team Losses
+     * @param int homeTeamScore = Home Team Score
+     * @param int awayTeamScore = Away Team Score
+     * @param int totalPoints = Away Team Total Points
+     */
+    public static void recordFixtureResultForAwayTeam(int awayTeamNum, int wins, int draws, int losses, 
+    int homeTeamScore, int awayTeamScore, int totalPoints)
     {
-        leaderBoard[aTN-1][1]++;                    // gamesPlayed
-        leaderBoard[aTN-1][7]+= w;                  // awayWin
-        leaderBoard[aTN-1][8]+= d;                  // awayDraw
-        leaderBoard[aTN-1][9]+= l;                  // awayLoss
-        leaderBoard[aTN-1][10]+= aTS;               // awayTeamScore
-        leaderBoard[aTN-1][11]+= hTS;               // homeTeamScore
-        leaderBoard[aTN-1][12] += (aTS - hTS);      // goalDifference
-        leaderBoard[aTN-1][13] += p;                // points  
-    }   
+        leaderBoard[awayTeamNum-1][1]++;                    				// gamesPlayed
+        leaderBoard[awayTeamNum-1][2]+= wins;                  				// homeWin
+        leaderBoard[awayTeamNum-1][3]+= draws;                  			// homeDraw
+        leaderBoard[awayTeamNum-1][4]+= losses;                  			// homeLoss
+        leaderBoard[awayTeamNum-1][5]+= homeTeamScore;                		// homeTeamScore
+        leaderBoard[awayTeamNum-1][6]+= awayTeamScore;                		// awayTeamScore
+        leaderBoard[awayTeamNum-1][12] += (awayTeamScore - homeTeamScore);  // goalDifference
+        leaderBoard[awayTeamNum-1][13] += totalPoints;                		// points
+    }  
 
+    /** This arranges the leaderBoard as long as continues remains true
+     * and orders the leaderboard in order of totalPoints.
+     */
     public static void orderLeaderBoard()
     {
-        int [][] temp = new int[leaderBoard.length][leaderBoard[0].length];
-        boolean finished = false;
-        while (!finished) 
+        int [][] temporaryArray = new int[leaderBoard.length][leaderBoard[0].length];
+        boolean continues = false;
+        while (!continues) 
         {
-            finished = true;
+            continues = true;
             for (int i = 0; i < leaderBoard.length - 1; i++) 
             {
                 if (leaderBoard[i][13] < leaderBoard[i + 1][13])
                 {
                     for (int j = 0; j < leaderBoard[i].length; j++) 
                     {
-                        temp[i][j]            = leaderBoard[i][j];
-                        leaderBoard[i][j]     = leaderBoard[i + 1][j];
-                        leaderBoard[i + 1][j] = temp[i][j];
+                        temporaryArray[i][j] = leaderBoard[i][j];
+                        leaderBoard[i][j] = leaderBoard[i + 1][j];
+                        leaderBoard[i + 1][j] = temporaryArray[i][j];
                     }
-                    finished = false;
+                    continues = false;
                 }
             }
         }
-    }     
+    }         
 
+    /** This displays the filled in leaderboard with the respective
+     * details and formats the column widths accordingly taking the longest team name
+     * and prints out the details from the 2D leaderBoard array.
+     */
     public static void displayLeaderboard()
     {
         int aTeamNumber;
@@ -1048,8 +1156,13 @@ public class LeagueManagement
             System.out.printf("%5d", leaderBoard[i][13]);
             System.out.println();
         }
-    }
-    //Love From Ryan
+    }  
+
+    /**
+     * It looks at the leagues text file and goes through each line , it takes the string that is on that line and splits 
+     * it at each comma. It then returns the last number at first position on the last line. This is the League Identifier Number.
+     *@return identifierNo		The first number on the last line of the file leagues.
+     */
     public static int findLeagueIdentifierNumber () throws IOException
     {   
         int identifierNo;
@@ -1078,7 +1191,12 @@ public class LeagueManagement
         return identifierNo;
     }
 
-    //Love From Ryan
+    /**
+     * It writes to the Leagues text file, writing in the last position so it doesn't overwrite any of the other leagues. 
+     * It takes the last league number used and adds one to it. 
+     * In the file it prints the league number, then the league Name and then the usernames Identifier Number, all of which 
+     * are divided by commas.
+     */
     public static void createLeague() throws IOException
     {
         int leagueNo = findLeagueIdentifierNumber();
@@ -1110,43 +1228,47 @@ public class LeagueManagement
                 JOptionPane.showMessageDialog(null,"Enter a name between 1 to 20 and only alphabetical characters","League Name Error", 1);
             }
         }
-
     }
-    //METHOD NEEDED FOR LUKE, PLEASE REFERENCE IF NEEDS BE CHEERS 
-    public static int LeagueNumberFromName ( String leagueName)  throws IOException
+
+    /**
+     *	It gets passed the league name , then it looks at the leagues text file. Going through each line it looks for a league name 
+     *	that is the same as the one that was passed in. It can only be accessed by the edit league option, so when one is found it returns the 
+     *	league number associated with the league name passed in.
+     *	@param leagueName			The name of the selected league.
+     * 	@return leagueNumber		The league number associated with the league name passed in.
+     */
+    public static int getLeagueIDFromName(String leagueName) throws IOException
     {
-        FileReader aFileReader = new FileReader("leagues.txt");
-        Scanner in = new Scanner (aFileReader) ;
-        String leagueN, leagueInfo;
-        int leagueNumber=0;
+        Scanner in = new Scanner(leagues);
         while(in.hasNext())
         {
-            leagueInfo= in.nextLine();
-            String leagueInfoArr[] = leagueInfo.split(",");
-            leagueN = leagueInfoArr[1];
-
-            if (leagueN.equals(leagueName))
+            String temp = in.nextLine();
+            if(temp.contains(leagueName))
             {
-                String leagueNum = leagueInfoArr[0] ;
-                leagueNumber = Integer.parseInt(leagueNum);
+                String tempArray[] = temp.split(",");
+                return Integer.parseInt(tempArray[0]);
             }
-
         }
         in.close();
-        return leagueNumber;
+        return 0;
     }
-    //Please Find attached the Keep and not keep version of this method to delete the League
-    //it replaces it with null, but i will fix that tomorrow, but its done incase yous think i did nothing ily xoxo 
+
+    /**
+     *	Takes in the name of the league that has to be deleted. From the league name it gets the league number associated to it. 
+     *	It makes an array list of all the Leagues, then it looks at the league numbers and it deletes the league associated with the 
+     *	name of the league that was passed in. It then writes the remaining leagues into the leagues text file.
+     *	@param leagueNameToDel				the name of the league that needs to be deleted.
+     */
     public static void deleteSelectedLeague(String leagueNameToDel) throws IOException
     {
-        int leagueNumToDelete = LeagueNumberFromName(leagueNameToDel);
-        int findLeagueNumber = findLeagueIdentifierNumber();
+        int leagueNumToDelete = getLeagueIDFromName(leagueNameToDel);
+        // int findLeagueNumber = findLeagueIdentifierNumber();
         ArrayList<String> leaguesToKeep = new ArrayList<String>();
         Scanner in = new Scanner (leagues) ;
         while(in.hasNext())
         {
             String leagueInfo= in.nextLine();
-            String leagueInfoArr[] = leagueInfo.split(",");
+            //String leagueInfoArr[] = leagueInfo.split(",");
             leaguesToKeep.add(leagueInfo);
 
         }
@@ -1169,6 +1291,11 @@ public class LeagueManagement
         in.close();
     }
 
+    /** This follows from deleteSelectedLeague by deleting its
+     * respective participant,fixtures, and results files.
+     * It uses the files native .delete to remove the entire file.
+     * @param int value of the LeagueID 
+     */
     public static void deleteLeagueTeamsAndResults(int leagueID) throws IOException
     {
         String participant = "_participants.txt";
