@@ -32,7 +32,6 @@ public class LeagueManagement
         int choice = -1;
         int choice2 = -1;
         int choice3 = -1;
-        boolean isLeagueSelected = false; //used to check if user has chosen a league
         String selectedLeague = ""; //League currently selected at league management
         String loggedInUser = "You are currently not logged in:\n\n";
         username = new StringBuilder("");
@@ -70,54 +69,42 @@ public class LeagueManagement
                 }
                 else if(choice2 == 1) //Manage existing league
                 {
-                    while(true)
+                    selectedLeague = editLeague();
+                    if(selectedLeague == null)
                     {
-                        if(!isLeagueSelected)
+                        choice2 = -1;
+                    }
+                    else
+                    {
+                        String temp = "League Manager for: "+ selectedLeague;
+                        choice3 = JOptionPane.showOptionDialog(null, temp + "\nSelect a league option:","League Manager",JOptionPane.YES_NO_OPTION, 
+                            1, null, leagueManageOptions, leagueManageOptions[0]);
+                    }
+                    if(choice3 == 0)
+                    {
+                        generateLeagueTable(selectedLeague);
+                    }
+                    else if(choice3 == 1)
+                    {
+                        displayTeams(selectedLeague);
+                    }
+                    else if(choice3 == 2)
+                    {
+                        int leagueNum = getLeagueIDFromName(selectedLeague);
+                        editResults(leagueNum);
+                        choice2 = 1;
+                    }
+                    else if(choice3 == 3)
+                    {
+                        if(JOptionPane.showConfirmDialog(null, "Are you sure?", "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
                         {
-                            selectedLeague = editLeague();
-                            isLeagueSelected = true;
+                            deleteSelectedLeague(selectedLeague);
+                            choice2 = 0;
                         }
-                        if(selectedLeague == null)
-                        {
-                            choice2 = -1;
-                            break;
-                        }
-                        else
-                        {
-                            String temp = "League Manager for: "+ selectedLeague;
-                            choice3 = JOptionPane.showOptionDialog(null, temp + "\nSelect a league option:","League Manager",JOptionPane.YES_NO_OPTION, 
-                                1, null, leagueManageOptions, leagueManageOptions[0]);
-                        }
-                        if(choice3 == 0)
-                        {
-                            generateLeagueTable(selectedLeague);
-                        }
-                        else if(choice3 == 1)
-                        {
-                            displayTeams(selectedLeague);
-                        }
-                        else if(choice3 == 2)
-                        {
-                            int leagueNum = getLeagueIDFromName(selectedLeague);
-                            createResults(leagueNum);
-                        }
-                        else if(choice3 == 3)
-                        {
-                            if(JOptionPane.showConfirmDialog(null, "Are you sure?", "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
-                            {
-                                deleteSelectedLeague(selectedLeague);
-                                choice2 = 0;
-                                isLeagueSelected = false;
-                                break;
-                            }
-                            
-                        }
-                        else if(choice3 == 4)
-                        {
-                            isLeagueSelected = false;
-                            choice2 = 1;
-                            break;
-                        }
+                    }
+                    else if(choice3 == 4)
+                    {
+                        choice2 = 1;
                     }
                 }
                 else if(choice2 == 2) //Delete Admin
@@ -142,7 +129,6 @@ public class LeagueManagement
 
         }while(choice != 2 && choice2 !=4);
     }
-    
 
     /**
      * Log in sequence when log in is pressed in main menu
@@ -252,7 +238,7 @@ public class LeagueManagement
                 {
                     String aLineFromFile = in.nextLine();
                     String temp[] = aLineFromFile.split(",");
-    	            if(input.equals(temp[1]))
+                    if(input.equals(temp[1]))
                     {
                         in.close();
                         return true;
@@ -262,7 +248,7 @@ public class LeagueManagement
                 {
                     String aLineFromFile = in.nextLine().toLowerCase();
                     String temp[] = aLineFromFile.split(",");
-    	            if(input.equals(temp[1].toLowerCase()))
+                    if(input.equals(temp[1].toLowerCase()))
                     {
                         in.close();
                         return true;
@@ -548,87 +534,68 @@ public class LeagueManagement
 
     /*/what needs to be done - Check if home/away team update. create array with the results. use this file struct 
     FixtureNumber,HomeParticipantScore,AwayParticipantScore /*/
-    public static void createResults(int num) throws IOException
+    public static void editResults(int leagueNumber) throws IOException
     {
-    ArrayList<String> results = new ArrayList<String>();
-    ArrayList<String> participants = new ArrayList<String>();
-    String fixData = "";
-    String fixDataArray[];
-    int leagueNumber = num;
-    int inputInt = 0;
-    int homeScore = 0, awayScore = 0;
-    int counter = 1;
-    File fixtureFile = new File(leagueNumber + "_fixtures.txt");
-    File participantsFile = new File(leagueNumber + "_participants.txt");
-    Scanner inFixtures = new Scanner(fixtureFile);
-    Scanner inParticipants = new Scanner(participantsFile);
+        ArrayList<String> results = new ArrayList<String>();
+        int inputInt = 0;
+        int homeScore = 0, awayScore = 0;
+        File fixtureFile = new File(leagueNumber + "_fixtures.txt");
+        File participantsFile = new File(leagueNumber + "_participants.txt");
+        File resultsFile = new File(leagueNumber + "_results.txt");
+        Scanner inFixtures = new Scanner(fixtureFile);
+        Scanner inParticipants = new Scanner(participantsFile);
 
-    while(inParticipants.hasNext()) //Fill participants array with names of league participants
-    {
-        String temp = inParticipants.nextLine();
-        temp = temp.substring(temp.indexOf(',') + 1);
-        participants.add(temp);
-    }
-    while(inFixtures.hasNextLine())
-    {
-        boolean isFixtureFilled = false; //Checks to see if both sides of fixture have been inputted before going to next fixture
-        fixData = inFixtures.nextLine();
-        fixDataArray = fixData.split(",");
+        ArrayList<String> allMatches = getMatches(leagueNumber);
+        String[] choices = allMatches.toArray(new String[allMatches.size()]);
+        String matchChoice = (String)(JOptionPane.showInputDialog(null, "Choose a league:",
+                    "League Management",JOptionPane.QUESTION_MESSAGE, null, choices,choices[0]));
+        int matchIndex = allMatches.indexOf(matchChoice);
 
-        while(!isFixtureFilled)
+        while(true)
         {
-            if(counter % 2 == 1)
+            String input = JOptionPane.showInputDialog(null, "Input score for home team in match: " + matchChoice);
+            if(!(input == null))
             {
-                while(true)
+                if(integerCheck(input))
                 {
-                    String input = JOptionPane.showInputDialog(null, "Input score for home team in match: " + participants.get(Integer.parseInt(fixDataArray[1])-1) + " v "  
-                                                + participants.get(Integer.parseInt(fixDataArray[2]) - 1));
-                    if(!(input == null))
-                    {
-                        if(integerCheck(input))
-                        {
-                            inputInt = Integer.parseInt(input);
-                            homeScore = inputInt;
-                            counter++;
-                            break;
-                        }
-                        else
-                            JOptionPane.showMessageDialog(null, "Incorrect format for score");
-                    }
+                    inputInt = Integer.parseInt(input);
+                    homeScore = inputInt;
+                    break;
                 }
-            }
-            else
-            {
-                while(true)
-                {
-                    String input = JOptionPane.showInputDialog(null, "Input score for away team in match: " +  participants.get(Integer.parseInt(fixDataArray[1]) - 1) + " v "  
-                                                + participants.get(Integer.parseInt(fixDataArray[2]) - 1));
-                    if(!(input == null))
-                    {
-                        if(integerCheck(input))
-                        {
-                            inputInt = Integer.parseInt(input);
-                            awayScore = inputInt;
-                            results.add(homeScore + "," + awayScore);
-                            counter++;
-                            isFixtureFilled = true;
-                            break;
-                        }
-                        else
-                            JOptionPane.showMessageDialog(null, "Incorrect format for score");   
-                    }
-                }
+                else
+                    JOptionPane.showMessageDialog(null, "Incorrect format for score");
             }
         }
-    }
-    File resultsFile = new File(leagueNumber + "_results.txt");
-    PrintWriter out = new PrintWriter(resultsFile);
-    for(int i = 0; i < results.size(); i++)
-        out.println(leagueNumber + "," + results.get(i));
-    out.close();
-    inFixtures.close();
-    inParticipants.close();
-}
+
+        while(true)
+        {
+            String input = JOptionPane.showInputDialog(null, "Input score for away team in match: " + matchChoice);
+            if(!(input == null))
+            {
+                if(integerCheck(input))
+                {
+                    inputInt = Integer.parseInt(input);
+                    awayScore = inputInt;
+                    break;
+                }
+                else
+                    JOptionPane.showMessageDialog(null, "Incorrect format for score");   
+            }
+        }
+        Scanner in = new Scanner(resultsFile);
+        while(in.hasNext()) //Copy results file
+            results.add(in.nextLine());
+        in.close();
+
+        results.remove(matchIndex);
+        results.add((matchIndex+1)+","+ homeScore + "," + awayScore);
+        PrintWriter out = new PrintWriter(resultsFile);
+        for(int i = 0; i < results.size(); i++)
+            out.println(results.get(i));
+        inFixtures.close();
+        inParticipants.close();
+        out.close();
+    }	
 
     /**
      * Deletes the admin with the provided name. This includes first deleting the teams, results
@@ -747,20 +714,17 @@ public class LeagueManagement
             String input =(String)(JOptionPane.showInputDialog(null, "Choose a league:",
                         "League Management",JOptionPane.QUESTION_MESSAGE, null, choices,choices[0]));
             return input;
-            //delete league option and edit league option
         }
     }
 
     //losg
-    public static void generateFixtures(int maxNum) throws IOException
+    public static int generateFixtures(int maxNum) throws IOException
     {
-
         int numOfTeams = 0, totalRounds, numOfMatchesPerRound;
         int roundNum, matchNumber, homeTeamNum, awayTeamNum, even, odd;
         File file = createFixtureFile();
 
         PrintWriter out = new PrintWriter(file);
-        String selection;
         String [][] fixtures;
         String [][] revisedFixtures;
         String []   elements;
@@ -768,7 +732,7 @@ public class LeagueManagement
 
         //***FILE STRUCTURE: FixtureNumber,HomeParticipant#,AwayParticipant#8*** 
         //checks selection
-        
+
         //if teams are odd, add one to number of teams 
         numOfTeams = maxNum;
 
@@ -819,6 +783,7 @@ public class LeagueManagement
             }
         }             
         out.close();
+        return i;
     }
 
     //losg
@@ -826,15 +791,13 @@ public class LeagueManagement
     {
 
         int leagueNum = findLeagueIdentifierNumber();
-        File file = new File(leagueNum + "_" + "fixtures" + ".txt");
-
+        File file = new File(leagueNum + "_fixtures.txt");
         return file;
     }
 
     /*/Luke - This method deletes the fixture corresponding to the users league number 
      **/
     public static void deleteFixture(String leagueNum) throws IOException{
-        ArrayList<Integer> deleteFixtureNumbers = getAdminLeagueIDs(username.toString());
         ArrayList<Integer> deleteLeagueNumbers = new ArrayList<Integer>();
         ArrayList<String> leaguesToKeep = new ArrayList<String>();
         Scanner in = new Scanner(leagueNum +"_" + "fixtures.");
@@ -926,7 +889,7 @@ public class LeagueManagement
      * Returns the amount of participants in a specific league
      * @param leagueNum league ID num to be searched
      * @return          Number of participants in the league
-     */
+     */	
     public static int getAmountOfParticipants(int leagueNum) throws IOException
     {
         File aFile = new File(leagueNum + "_participants.txt");
@@ -937,6 +900,35 @@ public class LeagueManagement
 
         in.close();
         return Integer.parseInt(data.substring(0,1));
+    }
+
+    public static ArrayList<String> getMatches(int leagueID) throws IOException
+    {
+        ArrayList<String> matches = new ArrayList<String>();
+        ArrayList<String> participants = new ArrayList<String>();
+        File fixtureFile = new File(leagueID + "_fixtures.txt");
+        File participantFile = new File(leagueID + "_participants.txt");
+        Scanner inPart = new Scanner(participantFile);
+        Scanner inFix = new Scanner(fixtureFile);
+
+        while(inPart.hasNext())
+        {
+            String temp = inPart.nextLine();
+            temp = temp.substring(temp.indexOf(',') + 1);
+            participants.add(temp);
+        }
+        while(inFix.hasNext())
+        {
+            String temp = inFix.nextLine();
+            String tempArray[] = temp.split(",");
+            int team1 = Integer.parseInt(tempArray[1]);
+            int team2 = Integer.parseInt(tempArray[2]);
+
+            matches.add(participants.get(team1 - 1) + " v " + participants.get(team2 - 1));
+        }
+        inFix.close();
+        inPart.close();
+        return matches;
     }
 
     /** generateLeagueTable method calls all of the subsequent methods required for
@@ -955,7 +947,7 @@ public class LeagueManagement
                 createEmptyLeaderBoard();
                 processResults();
                 orderLeaderBoard();
-                displayLeaderboard();
+                displayLeaderboard(selectedLeague);
             }
         }
     } 
@@ -967,7 +959,7 @@ public class LeagueManagement
      */
     public static boolean readFilesIntoArrayLists(String selectedLeague) throws IOException
     {
-        
+
         //public ArrayList<ArrayList<String>>  teams;
         //public ArrayList<ArrayList<Integer>> fixtures;   
         //public ArrayList<ArrayList<Integer>> results;
@@ -1158,7 +1150,7 @@ public class LeagueManagement
      * details and formats the column widths accordingly taking the longest team name
      * and prints out the details from the 2D leaderBoard array.
      */
-    public static void displayLeaderboard()
+    public static void displayLeaderboard(String leagueTitle)
     {
         int aTeamNumber;
         String aTeamName, formatStringTeamName;
@@ -1170,29 +1162,33 @@ public class LeagueManagement
             if (longestTeamNameLength < longestTeamName.length())
                 longestTeamNameLength = longestTeamName.length();
         }
-        formatStringTeamName = "%-" + (longestTeamNameLength + 2) + "s";
-        System.out.printf(formatStringTeamName,"Team Name");
-        System.out.println("  GP  HW  HD  HL  GF  GA  AW  AD  AL  GF  GA   GD   TP"); 
+        formatStringTeamName = "%-" + (longestTeamNameLength + 10) + "s";
+        String leaderBoardOutPut = "\nLeague: "+leagueTitle.toUpperCase()+"\n";
+        leaderBoardOutPut += String.format(formatStringTeamName,"Team Name");
+        leaderBoardOutPut +=("    GamesPlayed  HomeWins  HomeDraws  HomeLosses  GoalsScored  GoalsConceded  "+  
+            "AwayWins  AwayDraws  AwayLosses  GoalsScored  GoalsConceded   GoalDifference   TotalPoints");
+        leaderBoardOutPut += String.format("%n");
         for (int i = 0; i < leaderBoard.length; i++)
         {
             aTeamNumber       = leaderBoard[i][0];
-            aTeamName         = teams.get(1).get(aTeamNumber - 1);       
-            System.out.printf(formatStringTeamName, aTeamName);
-            System.out.printf("%4d", leaderBoard[i][1]);
-            System.out.printf("%4d", leaderBoard[i][2]);
-            System.out.printf("%4d", leaderBoard[i][3]);
-            System.out.printf("%4d", leaderBoard[i][4]);
-            System.out.printf("%4d", leaderBoard[i][5]);
-            System.out.printf("%4d", leaderBoard[i][6]);
-            System.out.printf("%4d", leaderBoard[i][7]);
-            System.out.printf("%4d", leaderBoard[i][8]);
-            System.out.printf("%4d", leaderBoard[i][9]);
-            System.out.printf("%4d", leaderBoard[i][10]);
-            System.out.printf("%4d", leaderBoard[i][11]);
-            System.out.printf("%5d", leaderBoard[i][12]);
-            System.out.printf("%5d", leaderBoard[i][13]);
-            System.out.println();
+            aTeamName         = teams.get(1).get(aTeamNumber - 1);
+            leaderBoardOutPut += String.format(formatStringTeamName, aTeamName);
+            leaderBoardOutPut += String.format("%25d", leaderBoard[i][1]);
+            leaderBoardOutPut += String.format("%24d", leaderBoard[i][2]);
+            leaderBoardOutPut += String.format("%23d", leaderBoard[i][3]);
+            leaderBoardOutPut += String.format("%25d", leaderBoard[i][4]);
+            leaderBoardOutPut += String.format("%25d", leaderBoard[i][5]);
+            leaderBoardOutPut += String.format("%26d", leaderBoard[i][6]);
+            leaderBoardOutPut += String.format("%26d", leaderBoard[i][7]);
+            leaderBoardOutPut += String.format("%26d", leaderBoard[i][8]);
+            leaderBoardOutPut += String.format("%26d", leaderBoard[i][9]);
+            leaderBoardOutPut += String.format("%26d", leaderBoard[i][10]);
+            leaderBoardOutPut += String.format("%26d", leaderBoard[i][11]);
+            leaderBoardOutPut += String.format("%26d", leaderBoard[i][12]);
+            leaderBoardOutPut += String.format("%26d", leaderBoard[i][13]);
+            leaderBoardOutPut += String.format("%n");
         }
+        JOptionPane.showMessageDialog(null,leaderBoardOutPut,"LeaderBoard",1);
     }  
 
     /**
@@ -1255,7 +1251,7 @@ public class LeagueManagement
                     while(true)
                     {
                         String temp = getnumOfTeams("Team Number Entry", 
-                                    "Please enter a number in the range 2 to 99");
+                                "Please enter a number in the range 2 to 99");
                         if(!(temp == null))
                         {
                             maxNum = Integer.parseInt(temp);
@@ -1267,8 +1263,14 @@ public class LeagueManagement
                                 break;
                         }
                     }
-                    generateFixtures(maxNum);
+                    int fixtureAmount = generateFixtures(maxNum);
                     createLeagueParticipants(maxNum);
+                    File resultsFile = new File(leagueNo + "_results.txt");
+                    out = new PrintWriter(resultsFile);
+                    for(int i = 0; i < fixtureAmount - 1; i++) // Fill results with 0s
+                        out.println((i+1) + "," + 0 + "," + 0);
+                    out.close();
+
                 }
                 else
                 { 
@@ -1292,17 +1294,17 @@ public class LeagueManagement
      */
     public static int getLeagueIDFromName(String leagueName) throws IOException
     {
-        Scanner in = new Scanner(leagues);
-        while(in.hasNext())
+        Scanner inFile = new Scanner(leagues);
+        while(inFile.hasNext())
         {
-            String temp = in.nextLine();
+            String temp = inFile.nextLine();
             if(temp.contains(leagueName))
             {
                 String tempArray[] = temp.split(",");
                 return Integer.parseInt(tempArray[0]);
             }
         }
-        in.close();
+        inFile.close();
         return 0;
     }
 
@@ -1315,13 +1317,11 @@ public class LeagueManagement
     public static void deleteSelectedLeague(String leagueNameToDel) throws IOException
     {
         int leagueNumToDelete = getLeagueIDFromName(leagueNameToDel);
-        // int findLeagueNumber = findLeagueIdentifierNumber();
         ArrayList<String> leaguesToKeep = new ArrayList<String>();
         Scanner in = new Scanner (leagues) ;
         while(in.hasNext())
         {
             String leagueInfo= in.nextLine();
-            //String leagueInfoArr[] = leagueInfo.split(",");
             leaguesToKeep.add(leagueInfo);
 
         }
