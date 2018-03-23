@@ -57,7 +57,7 @@ public class LeagueManagement
                     loggedIn = logInSequence(admin, username);
                     if(loggedIn)
                         upperCaseUser = username.substring(0, 1).toUpperCase() + username.substring(1);
-                        loggedInUser = "Logged in: " + upperCaseUser + "\n\n";
+                    loggedInUser = "Logged in: " + upperCaseUser + "\n\n";
                     usernameID = findAdminIdentifierNumber(username.toString());
                 }
                 else if(choice == 1)
@@ -721,7 +721,7 @@ public class LeagueManagement
         }
     }
 
-     /**
+    /**
      * Creates the fixtures as part of the league creation process 
      * Using a number provided by the user, fixtures including multiple rounds are generated
      * @param maxNum    Provides the method with the number of teams 
@@ -791,7 +791,7 @@ public class LeagueManagement
         return i;
     }
 
-     /**
+    /**
      * Creates the fixture file. File structure is leagueNumber + "_fixtures.txt"
      * @return          Returns file 
      */
@@ -803,7 +803,7 @@ public class LeagueManagement
         return file;
     }
 
-     /** This method deletes the corresponding fixture file to the selected league number
+    /** This method deletes the corresponding fixture file to the selected league number
      * Uses ArrayLists to check what needs to be kept and what needs to be deleted
      * @param LeagueNum     Provides the method with the relevant league number 
      */
@@ -861,7 +861,6 @@ public class LeagueManagement
         out.close();
     }
 
-    
     /** This method checks the input for fixture generatation and ensures it is valid.
      * @param windowMeassage 
      * @param windowTitle 
@@ -1152,7 +1151,7 @@ public class LeagueManagement
      */
     public static void displayLeaderboard(String leagueTitle)
     {
-        
+
         int aTeamNumber;
         String aTeamName, formatStringTeamName;
         String longestTeamName       = teams.get(1).get(0);
@@ -1166,7 +1165,7 @@ public class LeagueManagement
         formatStringTeamName = "%-" + (longestTeamNameLength + 10) + "s";
         String leaderBoardOutPut = "\nLeague: "+leagueTitle.toUpperCase()+"\n";
         leaderBoardOutPut += String.format(formatStringTeamName,"Team Name");
-        leaderBoardOutPut +=String.format("%20s%20s%20s%20s%20s%20s%20s%20s%20s%20s%20s%20s\n","GamesPlayed", "HomeWins",  "HomeDraws",  "HomeLosses",  "GoalsScored",  "GoalsConceded", 
+        leaderBoardOutPut +=String.format("%20s%20s%20s%20s%20s%20s%20s%20s%20s%20s%20s%20s%20s\n","GamesPlayed", "HomeWins",  "HomeDraws",  "HomeLosses",  "GoalsScored",  "GoalsConceded", 
             "AwayWins",  "AwayDraws",  "AwayLosses"  ,"GoalsScored" , "GoalsConceded"  , "GoalDifference",   "TotalPoints");
         //leaderBoardOutPut +=("    GamesPlayed  HomeWins  HomeDraws  HomeLosses  GoalsScored  GoalsConceded  "+  
         //    "AwayWins  AwayDraws  AwayLosses  GoalsScored  GoalsConceded   GoalDifference   TotalPoints");
@@ -1176,11 +1175,11 @@ public class LeagueManagement
             aTeamNumber       = leaderBoard[i][0];
             aTeamName         = teams.get(1).get(aTeamNumber - 1);
             leaderBoardOutPut += String.format(formatStringTeamName, aTeamName);
-            leaderBoardOutPut += String.format("%1$31d%1$35d%1$32d%1$32d%1$34d%1$30d%1$38d%1$31d%1$31d%1$29d%1$31d%1$32d\n",leaderBoard[i][1], leaderBoard[i][2],  leaderBoard[i][3],  leaderBoard[i][4],  
-            leaderBoard[i][5],  leaderBoard[i][6], leaderBoard[i][7],  leaderBoard[i][8],  leaderBoard[i][9]  ,leaderBoard[i][10] , leaderBoard[i][11]  , leaderBoard[i][12],   leaderBoard[i][13]);
+            leaderBoardOutPut += String.format("%31d%35d%32d%32d%34d%30d%38d%31d%31d%29d%31d%32d%30d\n",leaderBoard[i][1], leaderBoard[i][2],  leaderBoard[i][3],  leaderBoard[i][4],  
+                leaderBoard[i][5],  leaderBoard[i][6], leaderBoard[i][7],  leaderBoard[i][8],  leaderBoard[i][9]  ,leaderBoard[i][10] , leaderBoard[i][11]  , leaderBoard[i][12],   leaderBoard[i][13]);
         }
-        JOptionPane.showMessageDialog(null,leaderBoardOutPut,"LeaderBoard",1);
-    } 
+        JOptionPane.showMessageDialog(null,leaderBoardOutPut,"LeaderBoard",1); 
+    }   
 
     /**
      * It looks at the leagues text file and goes through each line , it takes the string that is on that line and splits 
@@ -1242,7 +1241,7 @@ public class LeagueManagement
                     while(true)
                     {
                         String temp = getnumOfTeams("Number of Teams", 
-                                "Please enter a number in the range 2 to 99 (Multiple rounds will be generated");
+                                "Please enter a number in the range 2 to 99");
                         if(!(temp == null))
                         {
                             maxNum = Integer.parseInt(temp);
