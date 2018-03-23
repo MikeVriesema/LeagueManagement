@@ -1093,14 +1093,14 @@ public class LeagueManagement
     int homeTeamScore, int awayTeamScore, int totalPoints)
     {
         leaderBoard[awayTeamNum-1][1]++;                    				// gamesPlayed
-        leaderBoard[awayTeamNum-1][2]+= wins;                  				// homeWin
-        leaderBoard[awayTeamNum-1][3]+= draws;                  			// homeDraw
-        leaderBoard[awayTeamNum-1][4]+= losses;                  			// homeLoss
-        leaderBoard[awayTeamNum-1][5]+= homeTeamScore;                		// homeTeamScore
-        leaderBoard[awayTeamNum-1][6]+= awayTeamScore;                		// awayTeamScore
+        leaderBoard[awayTeamNum-1][7]+= wins;                  				// homeWin
+        leaderBoard[awayTeamNum-1][8]+= draws;                  			// homeDraw
+        leaderBoard[awayTeamNum-1][9]+= losses;                  			// homeLoss
+        leaderBoard[awayTeamNum-1][10]+= homeTeamScore;                		// homeTeamScore
+        leaderBoard[awayTeamNum-1][11]+= awayTeamScore;                		// awayTeamScore
         leaderBoard[awayTeamNum-1][12] += (awayTeamScore - homeTeamScore);  // goalDifference
         leaderBoard[awayTeamNum-1][13] += totalPoints;                		// points
-    }  
+    }    
 
     /** This arranges the leaderBoard as long as continues remains true
      * and orders the leaderboard in order of totalPoints.
