@@ -545,8 +545,11 @@ public class LeagueManagement
         out.close();
     }	
 
-    /*/what needs to be done - Check if home/away team update. create array with the results. use this file struct 
-    FixtureNumber,HomeParticipantScore,AwayParticipantScore /*/
+    /** This method is used to provide results to each corresponding game
+     *  A results is opened and the user is prompted to select from a match from the dropdown menu
+     *  Once entered the result is saved the file 
+     * @param leagueNumber Provides method with the relevant league number  
+     */
     public static void editResults(int leagueNumber) throws IOException
     {
         ArrayList<String> results = new ArrayList<String>();
@@ -718,7 +721,12 @@ public class LeagueManagement
         }
     }
 
-    //losg
+     /**
+     * Creates the fixtures as part of the league creation process 
+     * Using a number provided by the user, fixtures including multiple rounds are generated
+     * @param maxNum    Provides the method with the number of teams 
+     * @return          Int i
+     */
     public static int generateFixtures(int maxNum) throws IOException
     {
         int numOfTeams = 0, totalRounds, numOfMatchesPerRound;
@@ -783,7 +791,10 @@ public class LeagueManagement
         return i;
     }
 
-    //losg
+     /**
+     * Creates the fixture file. File structure is leagueNumber + "_fixtures.txt"
+     * @return          Returns file 
+     */
     public static File createFixtureFile() throws IOException
     {
 
@@ -792,8 +803,9 @@ public class LeagueManagement
         return file;
     }
 
-    /*/Luke - This method deletes the fixture corresponding to the users league number 
-     **/
+     /** This method checks the input for fixture generatation and ensures it is valid.
+     * @param LeagueNum 
+     */
     public static void deleteFixture(String leagueNum) throws IOException{
         ArrayList<Integer> deleteLeagueNumbers = new ArrayList<Integer>();
         ArrayList<String> leaguesToKeep = new ArrayList<String>();
@@ -848,7 +860,12 @@ public class LeagueManagement
         out.close();
     }
 
-    //losg
+    
+    /** This method checks the input for fixture generatation and ensures it is valid.
+     * @param windowMeassage 
+     * @param windowTitle 
+     * @return Returns the input to method generateFixture
+     */
     public static String getnumOfTeams(String windowMessage, String windowTitle)
     {
         boolean validInput = false;    
@@ -1232,14 +1249,14 @@ public class LeagueManagement
                     int maxNum = 0;
                     while(true)
                     {
-                        String temp = getnumOfTeams("Team Number Entry", 
-                                "Please enter a number in the range 2 to 99");
+                        String temp = getnumOfTeams("Number of Teams", 
+                                "Please enter a number in the range 2 to 99 (Multiple rounds will be generated");
                         if(!(temp == null))
                         {
                             maxNum = Integer.parseInt(temp);
                             if(maxNum % 2 == 1)
                             {
-                                JOptionPane.showMessageDialog(null, "Unable to use odd teams");
+                                JOptionPane.showMessageDialog(null, "You cannot use an odd number of teams");
                             }
                             else
                                 break;
