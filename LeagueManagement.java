@@ -803,8 +803,9 @@ public class LeagueManagement
         return file;
     }
 
-     /** This method checks the input for fixture generatation and ensures it is valid.
-     * @param LeagueNum 
+     /** This method deletes the corresponding fixture file to the selected league number
+     * Uses ArrayLists to check what needs to be kept and what needs to be deleted
+     * @param LeagueNum     Provides the method with the relevant league number 
      */
     public static void deleteFixture(String leagueNum) throws IOException{
         ArrayList<Integer> deleteLeagueNumbers = new ArrayList<Integer>();
