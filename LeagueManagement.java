@@ -1152,6 +1152,7 @@ public class LeagueManagement
      */
     public static void displayLeaderboard(String leagueTitle)
     {
+        
         int aTeamNumber;
         String aTeamName, formatStringTeamName;
         String longestTeamName       = teams.get(1).get(0);
@@ -1165,31 +1166,21 @@ public class LeagueManagement
         formatStringTeamName = "%-" + (longestTeamNameLength + 10) + "s";
         String leaderBoardOutPut = "\nLeague: "+leagueTitle.toUpperCase()+"\n";
         leaderBoardOutPut += String.format(formatStringTeamName,"Team Name");
-        leaderBoardOutPut +=("    GamesPlayed  HomeWins  HomeDraws  HomeLosses  GoalsScored  GoalsConceded  "+  
-            "AwayWins  AwayDraws  AwayLosses  GoalsScored  GoalsConceded   GoalDifference   TotalPoints");
+        leaderBoardOutPut +=String.format("%20s%20s%20s%20s%20s%20s%20s%20s%20s%20s%20s%20s\n","GamesPlayed", "HomeWins",  "HomeDraws",  "HomeLosses",  "GoalsScored",  "GoalsConceded", 
+            "AwayWins",  "AwayDraws",  "AwayLosses"  ,"GoalsScored" , "GoalsConceded"  , "GoalDifference",   "TotalPoints");
+        //leaderBoardOutPut +=("    GamesPlayed  HomeWins  HomeDraws  HomeLosses  GoalsScored  GoalsConceded  "+  
+        //    "AwayWins  AwayDraws  AwayLosses  GoalsScored  GoalsConceded   GoalDifference   TotalPoints");
         leaderBoardOutPut += String.format("%n");
         for (int i = 0; i < leaderBoard.length; i++)
         {
             aTeamNumber       = leaderBoard[i][0];
             aTeamName         = teams.get(1).get(aTeamNumber - 1);
             leaderBoardOutPut += String.format(formatStringTeamName, aTeamName);
-            leaderBoardOutPut += String.format("%25d", leaderBoard[i][1]);
-            leaderBoardOutPut += String.format("%24d", leaderBoard[i][2]);
-            leaderBoardOutPut += String.format("%23d", leaderBoard[i][3]);
-            leaderBoardOutPut += String.format("%25d", leaderBoard[i][4]);
-            leaderBoardOutPut += String.format("%25d", leaderBoard[i][5]);
-            leaderBoardOutPut += String.format("%26d", leaderBoard[i][6]);
-            leaderBoardOutPut += String.format("%26d", leaderBoard[i][7]);
-            leaderBoardOutPut += String.format("%26d", leaderBoard[i][8]);
-            leaderBoardOutPut += String.format("%26d", leaderBoard[i][9]);
-            leaderBoardOutPut += String.format("%26d", leaderBoard[i][10]);
-            leaderBoardOutPut += String.format("%26d", leaderBoard[i][11]);
-            leaderBoardOutPut += String.format("%26d", leaderBoard[i][12]);
-            leaderBoardOutPut += String.format("%26d", leaderBoard[i][13]);
-            leaderBoardOutPut += String.format("%n");
+            leaderBoardOutPut += String.format("%1$31d%1$35d%1$32d%1$32d%1$34d%1$30d%1$38d%1$31d%1$31d%1$29d%1$31d%1$32d\n",leaderBoard[i][1], leaderBoard[i][2],  leaderBoard[i][3],  leaderBoard[i][4],  
+            leaderBoard[i][5],  leaderBoard[i][6], leaderBoard[i][7],  leaderBoard[i][8],  leaderBoard[i][9]  ,leaderBoard[i][10] , leaderBoard[i][11]  , leaderBoard[i][12],   leaderBoard[i][13]);
         }
         JOptionPane.showMessageDialog(null,leaderBoardOutPut,"LeaderBoard",1);
-    }  
+    } 
 
     /**
      * It looks at the leagues text file and goes through each line , it takes the string that is on that line and splits 
