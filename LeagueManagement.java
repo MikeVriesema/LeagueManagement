@@ -4,18 +4,21 @@
 import javax.swing.*;
 import java.io.*;
 import java.util.*;
-
 public class LeagueManagement
 {
-    static StringBuilder username;
-    static int usernameID;
-    static File admin;
-    static File leagues;
+    static StringBuilder username; //global logged in current user name
+    static int usernameID; //global logged in current user ID
+    static File admin; //global admin file
+    static File leagues; //global league file
     public static ArrayList<ArrayList<String>>  teams;
     public static ArrayList<ArrayList<Integer>> fixtures;   
     public static ArrayList<ArrayList<Integer>> results;
     public static int [][] leaderBoard;
 
+    /**
+     * The main creates the 2 necessary files for the program to operate. 
+     * It also calls the menuStart method which initiates the program.
+     */
     public static void main(String[] args) throws IOException
     {
         admin = new File("administrators.txt");
@@ -23,6 +26,11 @@ public class LeagueManagement
         menuStart();
     }
 
+    /**
+     * menuStart method runs the main menu for the application
+     * and allows all other methods in the program to be accessed.
+     * The entirety of the program runs on a JOptionPane interface.
+     */
     public static void menuStart() throws IOException
     {
         boolean loggedIn = false;
@@ -34,6 +42,7 @@ public class LeagueManagement
         int choice3 = -1;
         String selectedLeague = ""; //League currently selected at league management
         String loggedInUser = "You are currently not logged in:\n\n";
+        String upperCaseUser = "";
         username = new StringBuilder("");
         checkSetup();
         do
@@ -47,7 +56,8 @@ public class LeagueManagement
                 {
                     loggedIn = logInSequence(admin, username);
                     if(loggedIn)
-                        loggedInUser = "Logged in: " + username + "\n\n";
+                        upperCaseUser = username.substring(0, 1).toUpperCase() + username.substring(1);
+                        loggedInUser = "Logged in: " + upperCaseUser + "\n\n";
                     usernameID = findAdminIdentifierNumber(username.toString());
                 }
                 else if(choice == 1)
@@ -55,17 +65,19 @@ public class LeagueManagement
                     createAdmin();
                     createFixtureFile(); 
                 }
+                else if(choice == JOptionPane.CLOSED_OPTION)
+                {
+                    System.exit(1);
+                }
             }
             else
             {
                 choice2 = JOptionPane.showOptionDialog(null, loggedInUser + "Select a Menu:", "League Manager",JOptionPane.YES_NO_OPTION, 
                     1, null, tableOptions, options[0]);
-
                 if(choice2 == 0) //Create new league
                 {
                     createLeague();
                     choice2 = -1;
-
                 }
                 else if(choice2 == 1) //Manage existing league
                 {
@@ -83,10 +95,12 @@ public class LeagueManagement
                     if(choice3 == 0)
                     {
                         generateLeagueTable(selectedLeague);
+                        choice2 = 1;
                     }
                     else if(choice3 == 1)
                     {
                         displayTeams(selectedLeague);
+                        choice2 = 1;
                     }
                     else if(choice3 == 2)
                     {
@@ -125,8 +139,11 @@ public class LeagueManagement
                     loggedInUser = "Not logged in:\n\n";
                     choice2 = 0;    
                 }
+                else if(choice2 == JOptionPane.CLOSED_OPTION)
+                {
+                    System.exit(1);
+                }
             }
-
         }while(choice != 2 && choice2 !=4);
     }
 
@@ -156,7 +173,9 @@ public class LeagueManagement
                     temp = stringAtIndexNumber(admin, index).split(",");
                     while(attempts < 3)
                     {
-                        inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + temp[1]);
+                        String upperCaseUser = temp[1];
+                        upperCaseUser = upperCaseUser.substring(0, 1).toUpperCase() + upperCaseUser.substring(1);
+                        inputPassword = JOptionPane.showInputDialog(null, "Please enter password for " + upperCaseUser);
                         if(inputPassword != null)
                         {
                             if(passwordCheck(inputPassword) && inputPassword.equals(temp[2]))
@@ -172,6 +191,7 @@ public class LeagueManagement
                                 {
                                     attempts++;
                                     JOptionPane.showMessageDialog(null, "No attempts left!");
+                                    System.exit(1);
                                 }
                                 else
                                 {    
@@ -283,7 +303,6 @@ public class LeagueManagement
                     break;
                 }       
             }
-
             in.close();
         }
         return result;
@@ -301,12 +320,10 @@ public class LeagueManagement
         int identifier = 0;
         Scanner in = new Scanner(admin);
         String aLineFromFile = "";
-
         while(in.hasNext())
         {
             aLineFromFile = in.nextLine();
             String temp[] = aLineFromFile.split(",");
-
             if(temp[1].toLowerCase().equals(adminName.toLowerCase()))
             {
                 identifier = Integer.parseInt(temp[0]);
@@ -378,13 +395,10 @@ public class LeagueManagement
         int lastNumber, newNumber;
         String adminName , password;
         boolean userCreated = false;
-
         FileWriter aFileWriter = new FileWriter(admin, true); 
         PrintWriter out = new PrintWriter(aFileWriter);
-
         lastNumber = findLastAdminNumber();
         newNumber = lastNumber + 1 ;
-
         while(userCreated == false)
         {
             adminName = JOptionPane.showInputDialog(null,"Please enter the username you wish to use:","CreateAdmin",1);
@@ -523,7 +537,6 @@ public class LeagueManagement
             else
                 break;
         }
-
         int fileIDNumber = findLeagueIdentifierNumber();
         File participantFile = new File(fileIDNumber + "_participants.txt");
         PrintWriter out = new PrintWriter(participantFile);
@@ -537,65 +550,58 @@ public class LeagueManagement
     public static void editResults(int leagueNumber) throws IOException
     {
         ArrayList<String> results = new ArrayList<String>();
-        int inputInt = 0;
+        int inputInt = 0, matchIndex = 0;
         int homeScore = 0, awayScore = 0;
-        File fixtureFile = new File(leagueNumber + "_fixtures.txt");
-        File participantsFile = new File(leagueNumber + "_participants.txt");
         File resultsFile = new File(leagueNumber + "_results.txt");
-        Scanner inFixtures = new Scanner(fixtureFile);
-        Scanner inParticipants = new Scanner(participantsFile);
-
         ArrayList<String> allMatches = getMatches(leagueNumber);
         String[] choices = allMatches.toArray(new String[allMatches.size()]);
         String matchChoice = (String)(JOptionPane.showInputDialog(null, "Choose a league:",
                     "League Management",JOptionPane.QUESTION_MESSAGE, null, choices,choices[0]));
-        int matchIndex = allMatches.indexOf(matchChoice);
-
-        while(true)
+        if(matchChoice != null)
         {
-            String input = JOptionPane.showInputDialog(null, "Input score for home team in match: " + matchChoice);
-            if(!(input == null))
+            matchIndex = allMatches.indexOf(matchChoice);
+            while(true)
             {
-                if(integerCheck(input))
+                String input = JOptionPane.showInputDialog(null, "Input score for home team in match: " + matchChoice);
+                if(!(input == null))
                 {
-                    inputInt = Integer.parseInt(input);
-                    homeScore = inputInt;
-                    break;
+                    if(integerCheck(input))
+                    {
+                        inputInt = Integer.parseInt(input);
+                        homeScore = inputInt;
+                        break;
+                    }
+                    else
+                        JOptionPane.showMessageDialog(null, "Incorrect format for score");
                 }
-                else
-                    JOptionPane.showMessageDialog(null, "Incorrect format for score");
             }
-        }
-
-        while(true)
-        {
-            String input = JOptionPane.showInputDialog(null, "Input score for away team in match: " + matchChoice);
-            if(!(input == null))
+            while(true)
             {
-                if(integerCheck(input))
+                String input = JOptionPane.showInputDialog(null, "Input score for away team in match: " + matchChoice);
+                if(!(input == null))
                 {
-                    inputInt = Integer.parseInt(input);
-                    awayScore = inputInt;
-                    break;
+                    if(integerCheck(input))
+                    {
+                        inputInt = Integer.parseInt(input);
+                        awayScore = inputInt;
+                        break;
+                    }
+                    else
+                        JOptionPane.showMessageDialog(null, "Incorrect format for score");   
                 }
-                else
-                    JOptionPane.showMessageDialog(null, "Incorrect format for score");   
             }
-        }
-        Scanner in = new Scanner(resultsFile);
-        while(in.hasNext()) //Copy results file
-            results.add(in.nextLine());
-        in.close();
-
-        results.remove(matchIndex);
-        results.add((matchIndex+1)+","+ homeScore + "," + awayScore);
-        PrintWriter out = new PrintWriter(resultsFile);
-        for(int i = 0; i < results.size(); i++)
-            out.println(results.get(i));
-        inFixtures.close();
-        inParticipants.close();
-        out.close();
-    }	
+            Scanner in = new Scanner(resultsFile);
+            while(in.hasNext()) //Copy results file
+                results.add(in.nextLine());
+            in.close();
+            results.remove(matchIndex);
+            results.add(matchIndex, (matchIndex + 1)+ "," + homeScore + "," + awayScore);
+            PrintWriter out = new PrintWriter(resultsFile);
+            for(int i = 0; i < results.size(); i++)
+                out.println(results.get(i));
+            out.close();
+        } 
+    }
 
     /**
      * Deletes the admin with the provided name. This includes first deleting the teams, results
@@ -609,10 +615,8 @@ public class LeagueManagement
         {
             deleteLeagueTeamsAndResults(adminToDelete); //First delete teams and results
             deleteAdminLeagues(adminToDelete); //Second delete the league
-
             ArrayList<String> adminArray = new ArrayList<String>();
             Scanner in = new Scanner(admin); //Delete admin
-
             while(in.hasNext())
             {
                 String data = in.nextLine();
@@ -621,7 +625,6 @@ public class LeagueManagement
             }
             in.close();
             PrintWriter out = new PrintWriter(admin);
-
             for(int i = 0; i < adminArray.size(); i++)
                 out.println(adminArray.get(i));
             out.close();
@@ -678,7 +681,6 @@ public class LeagueManagement
             }
             String tempFixture = leagueIDNumbers.get(i) + fixture;
             File fixtureFile = new File(tempFixture);
-
             if(fixtureFile.exists())
             {
                 fixtureFile.delete();
@@ -686,7 +688,6 @@ public class LeagueManagement
             }
             String tempResults = leagueIDNumbers.get(i) + results;
             File resultsFile = new File(tempResults);  
-
             if(resultsFile.exists())
             {
                 resultsFile.delete();
@@ -723,15 +724,11 @@ public class LeagueManagement
         int numOfTeams = 0, totalRounds, numOfMatchesPerRound;
         int roundNum, matchNumber, homeTeamNum, awayTeamNum, even, odd;
         File file = createFixtureFile();
-
         PrintWriter out = new PrintWriter(file);
         String [][] fixtures;
         String [][] revisedFixtures;
         String []   elements;
         String fixtureAsText;
-
-        //***FILE STRUCTURE: FixtureNumber,HomeParticipant#,AwayParticipant#8*** 
-        //checks selection
 
         //if teams are odd, add one to number of teams 
         numOfTeams = maxNum;
@@ -831,14 +828,12 @@ public class LeagueManagement
         ArrayList<String> leaguesToKeep = new ArrayList<String>();
         ArrayList<Integer> deleteLeagueNumbers = getAdminLeagueIDs(adminName);
         Scanner in = new Scanner(leagues);
-
         while(in.hasNext()) //Fill String array
         {
             String data = in.nextLine();
             leaguesToKeep.add(data);
         }
         in.close();
-
         for(int i = 0; i < deleteLeagueNumbers.size(); i++) //Remove lines using ArrayList of lines to remove
         {
             for(int j = 0; j < leaguesToKeep.size(); j++)
@@ -853,31 +848,26 @@ public class LeagueManagement
         out.close();
     }
 
-    //losg - might be able to replace it with Mitch's checkInput
+    //losg
     public static String getnumOfTeams(String windowMessage, String windowTitle)
     {
         boolean validInput = false;    
         int numberOfnumOfTeams;
-        String input = "", pattern = "[0-9]{1,2}";
+        String input = "";
         String errorMessage = "Input invalid.\n\nClick OK to retry."; 
         while (!validInput)
         {
             input = JOptionPane.showInputDialog(null, windowMessage, windowTitle, 3);
             if (input == null){
                 validInput = true;
-
             }
-
-            else if (!input.matches(pattern)) 
+            else if ((validInput = integerCheck(input)) == false) 
                 JOptionPane.showMessageDialog(null, errorMessage, "Error in user input", 2);
-
             else
             {
                 numberOfnumOfTeams = Integer.parseInt(input);
-
                 if (numberOfnumOfTeams < 2)
                     JOptionPane.showMessageDialog(null, errorMessage, "Error in user input", 2);
-
                 else 
                     validInput = true;
             }
@@ -897,7 +887,6 @@ public class LeagueManagement
         String data = "";
         while(in.hasNext())
             data = in.nextLine();
-
         in.close();
         return Integer.parseInt(data.substring(0,1));
     }
@@ -910,7 +899,6 @@ public class LeagueManagement
         File participantFile = new File(leagueID + "_participants.txt");
         Scanner inPart = new Scanner(participantFile);
         Scanner inFix = new Scanner(fixtureFile);
-
         while(inPart.hasNext())
         {
             String temp = inPart.nextLine();
@@ -923,7 +911,6 @@ public class LeagueManagement
             String tempArray[] = temp.split(",");
             int team1 = Integer.parseInt(tempArray[1]);
             int team2 = Integer.parseInt(tempArray[2]);
-
             matches.add(participants.get(team1 - 1) + " v " + participants.get(team2 - 1));
         }
         inFix.close();
@@ -959,11 +946,6 @@ public class LeagueManagement
      */
     public static boolean readFilesIntoArrayLists(String selectedLeague) throws IOException
     {
-
-        //public ArrayList<ArrayList<String>>  teams;
-        //public ArrayList<ArrayList<Integer>> fixtures;   
-        //public ArrayList<ArrayList<Integer>> results;
-        //public int [][] leaderBoard;
         int leagueID = getLeagueIDFromName(selectedLeague);
         String filePart = leagueID+"_participants.txt";
         String fileFixt = leagueID+"_fixtures.txt";
@@ -1294,17 +1276,17 @@ public class LeagueManagement
      */
     public static int getLeagueIDFromName(String leagueName) throws IOException
     {
-        Scanner inFile = new Scanner(leagues);
-        while(inFile.hasNext())
+        Scanner in = new Scanner(leagues);
+        while(in.hasNext())
         {
-            String temp = inFile.nextLine();
+            String temp = in.nextLine();
             if(temp.contains(leagueName))
             {
                 String tempArray[] = temp.split(",");
                 return Integer.parseInt(tempArray[0]);
             }
         }
-        inFile.close();
+        in.close();
         return 0;
     }
 
