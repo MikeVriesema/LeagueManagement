@@ -95,18 +95,20 @@ public class LeagueManagement
                     if(choice3 == 0)
                     {
                         generateLeagueTable(selectedLeague);
-                        choice2 = 1;
+                        selectedLeague = editLeague();
+                        
                     }
                     else if(choice3 == 1)
                     {
                         displayTeams(selectedLeague);
-                        choice2 = 1;
+                        selectedLeague = editLeague();
+                     
                     }
                     else if(choice3 == 2)
                     {
                         int leagueNum = getLeagueIDFromName(selectedLeague);
                         editResults(leagueNum);
-                        choice2 = 1;
+                        selectedLeague = editLeague();
                     }
                     else if(choice3 == 3)
                     {
