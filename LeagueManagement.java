@@ -2,6 +2,8 @@
  * LeagueManagement
  */
 import javax.swing.*;
+
+import java.awt.Font;
 import java.io.*;
 import java.util.*;
 public class LeagueManagement
@@ -183,7 +185,7 @@ public class LeagueManagement
                         {
                             if(passwordCheck(inputPassword) && inputPassword.equals(temp[2]))
                             {
-                                JOptionPane.showMessageDialog(null, "Succesfully logged in!", "Log In Successful", 0);
+                                JOptionPane.showMessageDialog(null, "Succesfully logged in!", "Log In Successful", 1);
                                 user.append(temp[1]);
                                 loggedIn = true;
                                 break;
@@ -1161,34 +1163,40 @@ public class LeagueManagement
      */
     public static void displayLeaderboard(String leagueTitle)
     {
-
         int aTeamNumber;
-        String aTeamName, formatStringTeamName;
+        String aTeamName, format;
         String longestTeamName       = teams.get(1).get(0);
         int    longestTeamNameLength = longestTeamName.length();
         for (int i = 1; i < teams.get(1).size(); i++)
         {
             longestTeamName = teams.get(1).get(i);  
             if (longestTeamNameLength < longestTeamName.length())
-                longestTeamNameLength = longestTeamName.length();
+            longestTeamNameLength = longestTeamName.length();
         }
-        formatStringTeamName = "%-" + (longestTeamNameLength + 10) + "s";
+        format = "%-" + (longestTeamNameLength + 10) + "s";
+        
         String leaderBoardOutPut = "\nLeague: "+leagueTitle.toUpperCase()+"\n";
-        leaderBoardOutPut += String.format(formatStringTeamName,"Team Name");
-        leaderBoardOutPut +=String.format("%20s%20s%20s%20s%20s%20s%20s%20s%20s%20s%20s%20s%20s\n","GamesPlayed", "HomeWins",  "HomeDraws",  "HomeLosses",  "GoalsScored",  "GoalsConceded", 
-            "AwayWins",  "AwayDraws",  "AwayLosses"  ,"GoalsScored" , "GoalsConceded"  , "GoalDifference",   "TotalPoints");
+        leaderBoardOutPut += String.format(format,"Team Name");
+        leaderBoardOutPut += String.format("%20s%20s%20s%20s%20s%24s%20s%20s%20s%20s%20s%23s%20s\n","GamesPlayed", "HomeWins",  "HomeDraws",  "HomeLosses",  "GoalsScored",  "GoalsConceded", 
+        "AwayWins",  "AwayDraws",  "AwayLosses"  ,"GoalsScored" , "GoalsConceded"  , "GoalDifference",   "TotalPoints");
         //leaderBoardOutPut +=("    GamesPlayed  HomeWins  HomeDraws  HomeLosses  GoalsScored  GoalsConceded  "+  
         //    "AwayWins  AwayDraws  AwayLosses  GoalsScored  GoalsConceded   GoalDifference   TotalPoints");
-        leaderBoardOutPut += String.format("%n");
+        leaderBoardOutPut += "\n";
         for (int i = 0; i < leaderBoard.length; i++)
         {
             aTeamNumber       = leaderBoard[i][0];
             aTeamName         = teams.get(1).get(aTeamNumber - 1);
-            leaderBoardOutPut += String.format(formatStringTeamName, aTeamName);
-            leaderBoardOutPut += String.format("%31d%35d%32d%32d%34d%30d%38d%31d%31d%29d%31d%32d%30d\n",leaderBoard[i][1], leaderBoard[i][2],  leaderBoard[i][3],  leaderBoard[i][4],  
+            leaderBoardOutPut += String.format(format, aTeamName);
+            leaderBoardOutPut += String.format("%15d%21d%20d%20d%20d%22d%21d%21d%21d%20d%20d%20d%20d\n",leaderBoard[i][1], leaderBoard[i][2],  leaderBoard[i][3],  leaderBoard[i][4],  
                 leaderBoard[i][5],  leaderBoard[i][6], leaderBoard[i][7],  leaderBoard[i][8],  leaderBoard[i][9]  ,leaderBoard[i][10] , leaderBoard[i][11]  , leaderBoard[i][12],   leaderBoard[i][13]);
         }
-        JOptionPane.showMessageDialog(null,leaderBoardOutPut,"LeaderBoard",1); 
+        JTextArea ta = new JTextArea(); //Create JTextArea to properly display leaderboard
+        ta.setEditable(false);
+        ta.setOpaque(false);
+        ta.setWrapStyleWord(false);
+        ta.setText(leaderBoardOutPut);
+        ta.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        JOptionPane.showMessageDialog(null,ta,"LeaderBoard",1); 
     }   
 
     /**
