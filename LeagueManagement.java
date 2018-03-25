@@ -1339,6 +1339,7 @@ public class LeagueManagement
             if(temp.contains(leagueName))
             {
                 String tempArray[] = temp.split(",");
+                in.close();
                 return Integer.parseInt(tempArray[0]);
             }
         }
