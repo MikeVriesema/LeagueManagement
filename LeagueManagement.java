@@ -2,9 +2,8 @@
  * LeagueManagement
  */
 import javax.swing.*;
-
-import java.awt.Font;
 import java.io.*;
+import java.awt.*;
 import java.util.*;
 public class LeagueManagement
 {
@@ -195,7 +194,7 @@ public class LeagueManagement
                                 if(attempts == 2)
                                 {
                                     attempts++;
-                                    JOptionPane.showMessageDialog(null, "No attempts left!", "Error", 2);
+                                    JOptionPane.showMessageDialog(null, "No attempts left!", "Error", 0);
                                     System.exit(1);
                                 }
                                 else
@@ -539,7 +538,7 @@ public class LeagueManagement
                     teamCount++;
                 }
                 else
-                    JOptionPane.showMessageDialog(null, "Incorrect format of participant");
+                    JOptionPane.showMessageDialog(null, "Incorrect format:\nAlphabetical characters only!","Team Input",2);
             else
                 break;
         }
@@ -583,8 +582,10 @@ public class LeagueManagement
                             break;
                         }
                         else
-                            JOptionPane.showMessageDialog(null, "Incorrect format for score");
+                            JOptionPane.showMessageDialog(null, "Incorrect format for score","Result Input",2);
+                            
                     }
+                    break;
                 }
                 while(true)
                 {
@@ -598,8 +599,10 @@ public class LeagueManagement
                             break;
                         }
                         else
-                            JOptionPane.showMessageDialog(null, "Incorrect format for score");   
+                            JOptionPane.showMessageDialog(null, "Incorrect format for score","Result Input",2);   
+                            
                     }
+                    break;
                 }
                 Scanner in = new Scanner(resultsFile);
                 while(in.hasNext()) //Copy results file
@@ -645,7 +648,7 @@ public class LeagueManagement
             out.close();
         }
         else
-            JOptionPane.showMessageDialog(null, "Cannot delete this admin as it doesn't exist");
+            JOptionPane.showMessageDialog(null, "Cannot delete this admin as it doesn't exist","Delete Admin",0);
     }
 
     /**
@@ -720,7 +723,7 @@ public class LeagueManagement
         if(tableDropDown.size()==0)
         {
             JOptionPane.showMessageDialog(null,"No leagues associated with this account!\nPlease create a league!"
-            ,"Manage Leagues",1);
+            ,"Manage Leagues",2);
             return null;
         }
         else
@@ -728,7 +731,7 @@ public class LeagueManagement
             String[] choices = new String[tableDropDown.size()];
             choices = tableDropDown.toArray(choices);
             String input =(String)(JOptionPane.showInputDialog(null, "Choose a league:",
-                        "League Management",JOptionPane.QUESTION_MESSAGE, null, choices,choices[0]));
+                        "League Management",3, null, choices,choices[0]));
             return input;
         }
     }
@@ -957,7 +960,7 @@ public class LeagueManagement
             boolean readFile; 
             readFile = readFilesIntoArrayLists(selectedLeague);
             if (!(readFile))
-                System.out.println("One or more files do not exist.");
+                JOptionPane.showMessageDialog(null,"Information Missing:\nTry inputting name,teams,fixtures and results!","League Table",2);
             else
             {
                 createEmptyLeaderBoard();
@@ -1173,30 +1176,28 @@ public class LeagueManagement
             if (longestTeamNameLength < longestTeamName.length())
             longestTeamNameLength = longestTeamName.length();
         }
-        format = "%-" + (longestTeamNameLength + 10) + "s";
+        format = "%-" + (longestTeamNameLength + 2) + "s";
         
         String leaderBoardOutPut = "\nLeague: "+leagueTitle.toUpperCase()+"\n";
         leaderBoardOutPut += String.format(format,"Team Name");
-        leaderBoardOutPut += String.format("%20s%20s%20s%20s%20s%24s%20s%20s%20s%20s%20s%23s%20s\n","GamesPlayed", "HomeWins",  "HomeDraws",  "HomeLosses",  "GoalsScored",  "GoalsConceded", 
-        "AwayWins",  "AwayDraws",  "AwayLosses"  ,"GoalsScored" , "GoalsConceded"  , "GoalDifference",   "TotalPoints");
-        //leaderBoardOutPut +=("    GamesPlayed  HomeWins  HomeDraws  HomeLosses  GoalsScored  GoalsConceded  "+  
-        //    "AwayWins  AwayDraws  AwayLosses  GoalsScored  GoalsConceded   GoalDifference   TotalPoints");
+        leaderBoardOutPut += String.format("%14s%10s%11s%12s%13s%15s%10s%11s%12s%13s%15s%16s%13s\n","GamesPlayed","HomeWins","HomeDraws","HomeLosses","GoalsScored","GoalsConceded", 
+        "AwayWins","AwayDraws","AwayLosses","GoalsScored","GoalsConceded","GoalDifference","TotalPoints");
         leaderBoardOutPut += "\n";
         for (int i = 0; i < leaderBoard.length; i++)
         {
             aTeamNumber       = leaderBoard[i][0];
             aTeamName         = teams.get(1).get(aTeamNumber - 1);
-            leaderBoardOutPut += String.format(format, aTeamName);
-            leaderBoardOutPut += String.format("%15d%21d%20d%20d%20d%22d%21d%21d%21d%20d%20d%20d%20d\n",leaderBoard[i][1], leaderBoard[i][2],  leaderBoard[i][3],  leaderBoard[i][4],  
-                leaderBoard[i][5],  leaderBoard[i][6], leaderBoard[i][7],  leaderBoard[i][8],  leaderBoard[i][9]  ,leaderBoard[i][10] , leaderBoard[i][11]  , leaderBoard[i][12],   leaderBoard[i][13]);
+            leaderBoardOutPut += String.format(format,aTeamName);
+            leaderBoardOutPut += String.format("%9d%12d%10d%11d%13d%13d%14d%10d%11d%13d%13d%14d%17d\n",leaderBoard[i][1],leaderBoard[i][2],leaderBoard[i][3],leaderBoard[i][4],  
+                leaderBoard[i][5],leaderBoard[i][6],leaderBoard[i][7],leaderBoard[i][8],leaderBoard[i][9],leaderBoard[i][10],leaderBoard[i][11],leaderBoard[i][12],leaderBoard[i][13]);
         }
-        JTextArea ta = new JTextArea(); //Create JTextArea to properly display leaderboard
-        ta.setEditable(false);
-        ta.setOpaque(false);
-        ta.setWrapStyleWord(false);
-        ta.setText(leaderBoardOutPut);
-        ta.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        JOptionPane.showMessageDialog(null,ta,"LeaderBoard",1); 
+        JTextArea table = new JTextArea(); //Create JTextArea to properly display leaderboard
+        table.setEditable(false);
+        table.setOpaque(false);
+        table.setWrapStyleWord(false);
+        table.setText(leaderBoardOutPut);
+        table.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        JOptionPane.showMessageDialog(null,table,"LeaderBoard",1); 
     }   
 
     /**
@@ -1265,7 +1266,7 @@ public class LeagueManagement
                             maxNum = Integer.parseInt(temp);
                             if(maxNum % 2 == 1)
                             {
-                                JOptionPane.showMessageDialog(null, "You cannot use an odd number of teams");
+                                JOptionPane.showMessageDialog(null, "You cannot use an odd number of teams","Create League",2);
                             }
                             else
                                 break;
@@ -1282,12 +1283,12 @@ public class LeagueManagement
                 }
                 else
                 { 
-                    JOptionPane.showMessageDialog(null,"The League Name you picked already exists!","League Name Error", 1);
+                    JOptionPane.showMessageDialog(null,"The League Name you picked already exists!","League Name Error", 2);
                 }
             }
             else
             { 
-                JOptionPane.showMessageDialog(null,"Enter a name between 1 to 20 and only alphabetical characters","League Name Error", 1);
+                JOptionPane.showMessageDialog(null,"Enter a name between 1 to 20 and only alphabetical characters","League Name Error", 2);
             }
         }
 
