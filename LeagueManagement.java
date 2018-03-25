@@ -432,7 +432,10 @@ public class LeagueManagement
                                 }
                             }
                             else
+                            {
+                                userCreated = true;
                                 break;
+                            }
                         }
                     }
                     else
@@ -522,8 +525,9 @@ public class LeagueManagement
      * The names entered are placed in an array list which is then printed to a file
      * with the league number followed by '_participants.txt'.
      * @param maxTeamNum The maximum number of teams allowed in the league
+     * @return           true if all participants entered correctly
      */
-    public static void createLeagueParticipants(int maxTeamNum) throws IOException
+    public static boolean createLeagueParticipants(int maxTeamNum) throws IOException
     {
         ArrayList<String> participants = new ArrayList<String>();
         String input = "";
@@ -532,22 +536,34 @@ public class LeagueManagement
         {
             input = JOptionPane.showInputDialog(null, "Input participant");
             if(input != null)
-                if(stringCheck(input))
+                if(!containsIgnoreCase(input, participants))
                 {
-                    participants.add(input);
-                    teamCount++;
+                    if(stringCheck(input))
+                    {
+                        participants.add(input);
+                        teamCount++;
+                    }
+                    else
+                        JOptionPane.showMessageDialog(null, "Incorrect format:\nAlphabetical characters only!","Team Input",2);
                 }
                 else
-                    JOptionPane.showMessageDialog(null, "Incorrect format:\nAlphabetical characters only!","Team Input",2);
+                    JOptionPane.showMessageDialog(null, "This participant has already been entered");
             else
                 break;
         }
-        int fileIDNumber = findLeagueIdentifierNumber();
-        File participantFile = new File(fileIDNumber + "_participants.txt");
-        PrintWriter out = new PrintWriter(participantFile);
-        for(int i = 0; i < participants.size(); i++)
-            out.println((i + 1) + "," + participants.get(i));
-        out.close();
+        if(teamCount == maxTeamNum)
+        {
+            int fileIDNumber = findLeagueIdentifierNumber();
+            fileIDNumber++;
+            File participantFile = new File(fileIDNumber + "_participants.txt");
+            PrintWriter out = new PrintWriter(participantFile);
+            for(int i = 0; i < participants.size(); i++)
+                out.println((i + 1) + "," + participants.get(i));
+            out.close();
+            return true;
+        }
+        else
+            return false;
     }	
 
     /** This method is used to provide results to each corresponding game
@@ -1163,6 +1179,7 @@ public class LeagueManagement
     /** This displays the filled in leaderboard with the respective
      * details and formats the column widths accordingly taking the longest team name
      * and prints out the details from the 2D leaderBoard array.
+     * @param leagueTitle Name of league to be displayed
      */
     public static void displayLeaderboard(String leagueTitle)
     {
@@ -1242,6 +1259,7 @@ public class LeagueManagement
     public static void createLeague() throws IOException
     {
         int leagueNo = findLeagueIdentifierNumber();
+        boolean createFiles = false;
         leagueNo = leagueNo + 1;
         FileWriter aFileWriter = new FileWriter("leagues.txt", true); 
         PrintWriter out = new PrintWriter(aFileWriter);
@@ -1253,15 +1271,12 @@ public class LeagueManagement
             {
                 if(!(doesInputExist(leagues, leagueName, false)))
                 {
-                    out.println( leagueNo + "," + leagueName + "," + usernameID);
-                    out.close();
-                    aFileWriter.close();
                     int maxNum = 0;
                     while(true)
                     {
                         String temp = getnumOfTeams("Number of Teams", 
                                 "Please enter a number in the range 2 to 99");
-                        if(!(temp == null))
+                        if(temp != null)
                         {
                             maxNum = Integer.parseInt(temp);
                             if(maxNum % 2 == 1)
@@ -1269,17 +1284,31 @@ public class LeagueManagement
                                 JOptionPane.showMessageDialog(null, "You cannot use an odd number of teams","Create League",2);
                             }
                             else
+                            {
+                                createFiles = true;
                                 break;
+                            }
+                        }
+                        else
+                            break;
+                    }
+                    if(createFiles)
+                    {
+                        createFiles = false;
+                        createFiles = createLeagueParticipants(maxNum);
+                        if(createFiles) //Only create files if all participants are created properly
+                        {
+                            out.println( leagueNo + "," + leagueName + "," + usernameID);
+                            out.close();
+                            aFileWriter.close();
+                            int fixtureAmount = generateFixtures(maxNum);
+                            File resultsFile = new File(leagueNo + "_results.txt");
+                            out = new PrintWriter(resultsFile);
+                            for(int i = 0; i < fixtureAmount - 1; i++) // Fill results with 0s
+                                out.println((i+1) + "," + 0 + "," + 0);
+                            out.close();
                         }
                     }
-                    int fixtureAmount = generateFixtures(maxNum);
-                    createLeagueParticipants(maxNum); //Enter league participants
-                    File resultsFile = new File(leagueNo + "_results.txt");
-                    out = new PrintWriter(resultsFile);
-                    for(int i = 0; i < fixtureAmount - 1; i++) // Fill results with 0s
-                        out.println((i+1) + "," + 0 + "," + 0);
-                    out.close();
-
                 }
                 else
                 { 
@@ -1383,5 +1412,22 @@ public class LeagueManagement
         {
             resultsFile.delete();
         }
+    }
+
+    /**
+     * Returns a boolean depending on whether the provided array list contains the provided string 
+     * to search for. This comparison ignores the case of the input.
+     * @param strToCheck String to search for.
+     * @param list       ArrayList to search through
+     * @return           true if the search parameter is found
+     */
+    public static boolean containsIgnoreCase(String strToCheck, ArrayList<String> list)
+    {
+        for(int i = 0; i < list.size(); i++)
+        {
+            if(list.get(i).equalsIgnoreCase(strToCheck))
+                return true;
+        }
+        return false;
     }
 }
